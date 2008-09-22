@@ -14,31 +14,22 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.event;
 
-import com.google.code.jdde.client.Conversation;
-import com.google.code.jdde.client.DdeClient;
+import com.google.code.jdde.ddeml.CallbackParameters;
+import com.google.code.jdde.server.DdeServer;
+import com.google.code.jdde.server.ServerConversation;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class ConversationEvent {
+public class AdviseRequestEvent extends ConversationEvent<DdeServer, ServerConversation> {
 
-	private final DdeClient client;
-	private final Conversation conversation;
-	
-	public ConversationEvent(DdeClient client, Conversation conversation) {
-		this.client = client;
-		this.conversation = conversation;
-	}
-
-	public DdeClient getClient() {
-		return client;
-	}
-
-	public Conversation getConversation() {
-		return conversation;
+	public AdviseRequestEvent(DdeServer server,
+			ServerConversation conversation, CallbackParameters parameters) {
+		super(server, conversation);
+		//TODO rest of parameters
 	}
 	
 }

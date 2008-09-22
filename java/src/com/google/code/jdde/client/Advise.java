@@ -16,10 +16,10 @@
 
 package com.google.code.jdde.client;
 
-import com.google.code.jdde.client.event.AdviseDataEvent;
 import com.google.code.jdde.client.event.AdviseDataListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
+import com.google.code.jdde.event.AdviseDataEvent;
 import com.google.code.jdde.misc.ClientTransaction;
 import com.google.code.jdde.misc.ClipboardFormat;
 
@@ -30,7 +30,7 @@ import com.google.code.jdde.misc.ClipboardFormat;
 public class Advise {
 
 	private DdeClient client;
-	private Conversation conversation;
+	private ClientConversation conversation;
 	
 	private String item;
 	private ClipboardFormat format;
@@ -38,7 +38,7 @@ public class Advise {
 	private byte[] lastValue;
 	private AdviseDataListener listener;
 	
-	Advise(DdeClient client, Conversation conversation, String item,
+	Advise(DdeClient client, ClientConversation conversation, String item,
 			ClipboardFormat format, AdviseDataListener listener) {
 		this.client = client;
 		this.conversation = conversation;
@@ -62,9 +62,9 @@ public class Advise {
 	}
 	
 	public void stop() {
-		ClientTransaction tx = new ClientTransaction(client.getLoop());
-		tx.call(client.getIdInst(), null, conversation.getHandle(), item,
-				format.getValue(), TransactionFlags.XTYP_ADVSTOP, client.getDefaultTimeout());
+		ClientTransaction tx = new ClientTransaction(conversation);
+		tx.call(null, item, format.getValue(), TransactionFlags.XTYP_ADVSTOP,
+				client.getDefaultTimeout());
 
 		tx.throwExceptionOnError();
 		conversation.adviseStoped(this);

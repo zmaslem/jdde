@@ -16,9 +16,9 @@
 
 package com.google.code.jdde.client;
 
-import com.google.code.jdde.client.event.AsyncTransactionCompletedEvent;
 import com.google.code.jdde.client.event.AsyncTransactionCompletedListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
+import com.google.code.jdde.event.AsyncTransactionCompletedEvent;
 import com.google.code.jdde.misc.ClipboardFormat;
 
 /**
@@ -28,13 +28,13 @@ import com.google.code.jdde.misc.ClipboardFormat;
 public class AsyncTransaction {
 
 	private DdeClient client;
-	private Conversation conversation;
+	private ClientConversation conversation;
 	
 	private int transactionId;
 	
 	private AsyncTransactionCompletedListener listener;
 	
-	AsyncTransaction(DdeClient client, Conversation conversation, int transactionId,
+	AsyncTransaction(DdeClient client, ClientConversation conversation, int transactionId,
 			AsyncTransactionCompletedListener listener) {
 		this.client = client;
 		this.conversation = conversation;

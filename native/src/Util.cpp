@@ -16,6 +16,26 @@
 
 #include "Util.h"
 
+#define iCodePage CP_WINANSI
+
+HSZ UtilCreateStringHandle(JNIEnv *env, DWORD idInst, jstring jstr)
+{
+	HSZ hsz = NULL;
+	if (jstr != NULL) {
+		const char *str = env->GetStringUTFChars(jstr, 0);
+		hsz = DdeCreateStringHandle(idInst, str, iCodePage);
+		env->ReleaseStringUTFChars(jstr, str);
+	}
+	return hsz;
+}
+
+void UtilFreeStringHandle(DWORD idInst, HSZ hsz)
+{
+	if (hsz != NULL) {
+		DdeFreeStringHandle(idInst, hsz);
+	}
+}
+
 jobject NewObject(JNIEnv *env, const char *className, const char *signature, ...)
 {
 	va_list args;
@@ -35,6 +55,11 @@ jobject NewObject(JNIEnv *env, const char *className, const char *signature, ...
 jobject NewInteger(JNIEnv *env, int value)
 {
 	return NewObject(env, "Ljava/lang/Integer;", "(I)V", value);
+}
+
+jobject NewBoolean(JNIEnv *env, int value)
+{
+	return NewObject(env, "Ljava/lang/Boolean;", "(Z)V", value);
 }
 
 void SetObjectInPointer(JNIEnv *env, jobject pointer, jobject value)
@@ -109,11 +134,25 @@ jobject WrapCallbackParameters(
 	}
 
 	switch (uType) {
+	case XTYP_CONNECT:
+		//jdwData1 = CONVCONTEXT
+		jdwData2 = NewBoolean(env, dwData2);
+		break;
+	case XTYP_CONNECT_CONFIRM:
+	case XTYP_DISCONNECT:
+		// dwData1 is not used
+		jdwData2 = NewBoolean(env, dwData2);
+		break;
 	case XTYP_XACT_COMPLETE:
 		jdwData1 = NewInteger(env, dwData1);
 		jdwData2 = NewInteger(env, LOWORD(dwData2));
 		break;
 	}
+
+	// the following transactions don't use dwData1 nor dwData2:
+	// XTYP_EXECUTE
+	// XTYP_POKE
+	// XTYP_REQUEST
 
 	return NewObject(env,
 			"Lcom/google/code/jdde/ddeml/CallbackParameters;",

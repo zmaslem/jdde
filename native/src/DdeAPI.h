@@ -65,6 +65,14 @@ JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_NameService
 
 /*
  * Class:     com_google_code_jdde_ddeml_DdeAPI
+ * Method:    PostAdvise
+ * Signature: (ILjava/lang/String;Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_PostAdvise
+  (JNIEnv *, jclass, jint, jstring, jstring);
+
+/*
+ * Class:     com_google_code_jdde_ddeml_DdeAPI
  * Method:    Uninitialize
  * Signature: (I)Z
  */

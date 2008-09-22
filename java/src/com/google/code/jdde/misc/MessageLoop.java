@@ -46,6 +46,9 @@ public class MessageLoop {
 
 	/** List of tasks to be executed in the loop thread. */
 	private final List<Runnable> pendingTasks;
+	
+	/** Last throwable caught in the loop thread */
+	private Throwable lastThrowableCaught;
 
 	/** The message used to wake up the loop thread. */
 	private static int wakeUpMessage = 0x7FFF;
@@ -59,6 +62,15 @@ public class MessageLoop {
 
 		loopThread = new Thread(new LoopThread());
 		loopThread.start();
+	}
+
+	/**
+	 * Returns the last throwable caught in the loop thread.
+	 * 
+	 * @return the last throwable caught in the loop thread.
+	 */
+	public Throwable getLastThrowableCaught() {
+		return lastThrowableCaught;
 	}
 
 	/**
@@ -140,8 +152,8 @@ public class MessageLoop {
 				
 				try {
 					task.run();
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (Throwable t) {
+					lastThrowableCaught = t; 
 					// Cannot let exceptions destroy the loop thread.
 					// TODO: Create some kind of error handling.
 				}
@@ -167,8 +179,14 @@ public class MessageLoop {
 					return;
 				}
 
-				// Wait on a native message loop.
-				WinAPI.WaitOnMessageLoop(wakeUpMessage);
+				try {
+					// Wait on a native message loop.
+					WinAPI.WaitOnMessageLoop(wakeUpMessage);
+				} catch (Throwable t) {
+					lastThrowableCaught = t;
+					// Cannot let exceptions destroy the loop thread.
+					// TODO: Create some kind of error handling.
+				}
 			}
 		}
 		

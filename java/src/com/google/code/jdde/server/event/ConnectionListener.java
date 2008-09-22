@@ -14,16 +14,25 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.server.event;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import com.google.code.jdde.event.ConnectConfirmEvent;
+import com.google.code.jdde.event.ConnectEvent;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AdviseDataListener {
+public interface ConnectionListener {
 
-	void valueChanged(AdviseDataEvent event);
+	boolean onConnect(ConnectEvent e);
+	
+	void onConnectConfirm(ConnectConfirmEvent e);
+	
+//	void onDisconnect(ConnectionEvent e);
+//	
+//	void onRegister(ConnectionEvent e);
+//	
+//	void onUnregister(ConnectionEvent e);
 	
 }

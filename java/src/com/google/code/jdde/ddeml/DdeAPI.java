@@ -56,6 +56,8 @@ public class DdeAPI {
 	
 	public static native boolean NameService(int idInst, String hsz1, int afCmd);
 	
+	public static native boolean PostAdvise(int idInst, String hszTopic, String hszItem);
+	
 	public static native boolean Uninitialize(int idInst);
 	
 }

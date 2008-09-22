@@ -14,10 +14,10 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.event;
 
 import com.google.code.jdde.client.AsyncTransaction;
-import com.google.code.jdde.client.Conversation;
+import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.misc.ClipboardFormat;
 
@@ -25,7 +25,7 @@ import com.google.code.jdde.misc.ClipboardFormat;
  * 
  * @author Vitor Costa
  */
-public class AsyncTransactionCompletedEvent extends ConversationEvent {
+public class AsyncTransactionCompletedEvent extends ConversationEvent<DdeClient, ClientConversation> {
 
 	private final AsyncTransaction transaction;
 	private final ClipboardFormat format;
@@ -33,7 +33,7 @@ public class AsyncTransactionCompletedEvent extends ConversationEvent {
 	private final byte[] data;
 	private final int statusFlags;
 	
-	public AsyncTransactionCompletedEvent(DdeClient client, Conversation conversation, 
+	public AsyncTransactionCompletedEvent(DdeClient client, ClientConversation conversation, 
 			AsyncTransaction transaction, ClipboardFormat format, byte[] data, int statusFlag) {
 		
 		super(client, conversation);
