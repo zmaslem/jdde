@@ -14,16 +14,22 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.event;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import com.google.code.jdde.ddeml.CallbackParameters;
+import com.google.code.jdde.server.DdeServer;
+import com.google.code.jdde.server.ServerConversation;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AdviseDataListener {
+public class AdviseStartEvent extends ConversationEvent<DdeServer, ServerConversation> {
 
-	void valueChanged(AdviseDataEvent event);
+	public AdviseStartEvent(DdeServer server, ServerConversation conversation,
+			CallbackParameters parameters) {
+		super(server, conversation);
+		//TODO rest of parameters
+	}
 	
 }

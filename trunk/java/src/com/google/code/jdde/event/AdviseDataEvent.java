@@ -14,16 +14,36 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.event;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import com.google.code.jdde.client.Advise;
+import com.google.code.jdde.client.ClientConversation;
+import com.google.code.jdde.client.DdeClient;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AdviseDataListener {
+public class AdviseDataEvent extends ConversationEvent<DdeClient, ClientConversation> {
 
-	void valueChanged(AdviseDataEvent event);
-	
+	private final Advise advise;
+	private final byte[] data;
+
+	public AdviseDataEvent(DdeClient client, ClientConversation conversation,
+			Advise advise, byte[] data) {
+
+		super(client, conversation);
+		
+		this.advise = advise;
+		this.data = data;
+	}
+
+	public Advise getAdvise() {
+		return advise;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
 }

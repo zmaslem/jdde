@@ -14,36 +14,25 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.server.event;
 
-import com.google.code.jdde.client.Advise;
-import com.google.code.jdde.client.Conversation;
-import com.google.code.jdde.client.DdeClient;
+import com.google.code.jdde.event.ConnectConfirmEvent;
+import com.google.code.jdde.event.ConnectEvent;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class AdviseDataEvent extends ConversationEvent {
+public class ConnectionAdapter implements ConnectionListener {
 
-	private final Advise advise;
-	private final byte[] data;
+	@Override
+	public boolean onConnect(ConnectEvent e) {
+		return false;
+	}
 
-	public AdviseDataEvent(DdeClient client, Conversation conversation,
-			Advise advise, byte[] data) {
-
-		super(client, conversation);
+	@Override
+	public void onConnectConfirm(ConnectConfirmEvent e) {
 		
-		this.advise = advise;
-		this.data = data;
-	}
-
-	public Advise getAdvise() {
-		return advise;
-	}
-
-	public byte[] getData() {
-		return data;
 	}
 
 }

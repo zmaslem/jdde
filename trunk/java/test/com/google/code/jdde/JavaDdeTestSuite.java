@@ -14,16 +14,28 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
+import com.google.code.jdde.transaction.ConnectTest;
+import com.google.code.jdde.transaction.ExecuteTest;
+import com.google.code.jdde.transaction.PokeTest;
+import com.google.code.jdde.transaction.RequestTest;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AdviseDataListener {
+@RunWith(Suite.class)
+@SuiteClasses({
+	ConnectTest.class,
+	ExecuteTest.class,
+	PokeTest.class,
+	RequestTest.class
+})
+public class JavaDdeTestSuite {
 
-	void valueChanged(AdviseDataEvent event);
-	
 }

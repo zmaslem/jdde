@@ -29,41 +29,31 @@ import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.misc.ClipboardFormat;
-import com.google.code.jdde.misc.MessageLoop;
+import com.google.code.jdde.misc.DdeApplication;
 import com.google.code.jdde.misc.JavaDdeUtil;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class DdeClient {
+public class DdeClient extends DdeApplication {
 
 	private static Logger logger = JavaDdeUtil.getLogger();
-	
-	private int idInst;
-	private MessageLoop loop;
 	
 	private int defaultTimeout;
 	private ClipboardFormat defaultFormat;
 	
-	private List<Conversation> conversations;
+	private List<ClientConversation> conversations;
 	
 	public DdeClient() {
-		loop = new MessageLoop();
-		conversations = new ArrayList<Conversation>();
+		conversations = new ArrayList<ClientConversation>();
 		
 		defaultTimeout = 9999;
 		defaultFormat = ClipboardFormat.TEXT;
 		
-		initialize();
-	}
-	
-	int getIdInst() {
-		return idInst;
-	}
-	
-	MessageLoop getLoop() {
-		return loop;
+		initialize(new ClientCallbackImpl(), 
+				InitializeFlags.APPCLASS_STANDARD |
+				InitializeFlags.APPCMD_CLIENTONLY);
 	}
 	
 	public int getDefaultTimeout() {
@@ -82,29 +72,7 @@ public class DdeClient {
 		this.defaultFormat = defaultFormat;
 	}
 
-	private void initialize() {
-		final Pointer<Integer> error = new Pointer<Integer>();
-		
-		loop.invokeAndWait(new Runnable() {
-			public void run() {
-				Pointer<Integer> $idInst = new Pointer<Integer>();
-				int initError = DdeAPI.Initialize($idInst,
-						new ClientCallbackImpl(),
-						InitializeFlags.APPCLASS_STANDARD |
-						InitializeFlags.APPCMD_CLIENTONLY);
-				
-				if (initError != 0) {
-					error.value = initError;
-					return;
-				}
-				idInst = $idInst.value;
-			}
-		});
-
-		DmlError.throwExceptionIfValidError(error.value);
-	}
-	
-	public Conversation connect(final String service, final String topic) {
+	public ClientConversation connect(final String service, final String topic) {
 		final Pointer<Integer> error = new Pointer<Integer>();
 		final Pointer<Integer> hConv = new Pointer<Integer>();
 		
@@ -120,25 +88,16 @@ public class DdeClient {
 
 		DmlError.throwExceptionIfValidError(error.value);
 		
-		Conversation conversation = new Conversation(this, hConv.value, service, topic);
+		ClientConversation conversation = new ClientConversation(this, hConv.value, service, topic);
 		conversations.add(conversation);
 		
 		return conversation;
 	}
 	
-	public void disconnect() {
-		loop.invokeAndWait(new Runnable() {
-			public void run() {
-				DdeAPI.Uninitialize(idInst);
-				loop.terminate();
-			}
-		});
-	}
-	
-	public Conversation findConversation(int hConv) {
+	public ClientConversation findConversation(int hConv) {
 		for (int i = 0; i < conversations.size(); i++) {
-			Conversation conversation = conversations.get(i);
-			if (hConv == conversation.getHandle()) {
+			ClientConversation conversation = conversations.get(i);
+			if (hConv == conversation.getHConv()) {
 				return conversation;
 			}
 		}
@@ -162,7 +121,7 @@ public class DdeClient {
 		public FlagCallbackResult DdeFlagCallback(CallbackParameters parameters) {
 			switch (parameters.getUType()) {
 			case TransactionFlags.XTYP_ADVDATA:
-				Conversation conversation = findConversation(parameters.getHconv());
+				ClientConversation conversation = findConversation(parameters.getHconv());
 				if (conversation != null) {
 					conversation.fireValueChanged(parameters);
 				}
@@ -181,7 +140,7 @@ public class DdeClient {
 	
 		@Override
 		public void DdeNotificationCallback(CallbackParameters parameters) {
-			Conversation conversation = findConversation(parameters.getHconv());
+			ClientConversation conversation = findConversation(parameters.getHconv());
 			
 			switch (parameters.getUType()) {
 			case TransactionFlags.XTYP_DISCONNECT:

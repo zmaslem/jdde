@@ -14,16 +14,26 @@
  * the License.
  */
 
-package com.google.code.jdde.client.event;
+package com.google.code.jdde.event;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import com.google.code.jdde.misc.DdeApplication;
 
 /**
  * 
  * @author Vitor Costa
+ * 
+ * @param <A>
  */
-public interface AdviseDataListener {
+class DdeEvent<A extends DdeApplication> {
 
-	void valueChanged(AdviseDataEvent event);
+	private final A application;
+	
+	public DdeEvent(A application) {
+		this.application = application;
+	}
+
+	public A getApplication() {
+		return application;
+	}
 	
 }

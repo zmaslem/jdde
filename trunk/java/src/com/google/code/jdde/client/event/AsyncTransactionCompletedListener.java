@@ -16,6 +16,8 @@
 
 package com.google.code.jdde.client.event;
 
+import com.google.code.jdde.event.AsyncTransactionCompletedEvent;
+
 /**
  * 
  * @author Vitor Costa

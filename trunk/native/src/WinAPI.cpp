@@ -79,5 +79,9 @@ JNIEXPORT void JNICALL Java_com_google_code_jdde_ddeml_WinAPI_WaitOnMessageLoop
 		if (msg.message == (UINT) Msg || msg.message == WM_TIMER) {
 			return;
 		}
+
+		if (msg.message == 0x7F7F) {
+			return;
+		}
 	}
 }

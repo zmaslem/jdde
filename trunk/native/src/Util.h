@@ -22,9 +22,15 @@
 #include <winuser.h>
 #include <ddeml.h>
 
+HSZ UtilCreateStringHandle(JNIEnv *env, DWORD idInst, jstring jstr);
+
+void UtilFreeStringHandle(DWORD idInst, HSZ hsz);
+
 jobject NewObject(JNIEnv *env, const char *className, const char *signature, ...);
 
-jobject NewInteger(JNIEnv *, int);
+jobject NewInteger(JNIEnv *env, int value);
+
+jobject NewBoolean(JNIEnv *env, int value);
 
 void SetObjectInPointer(JNIEnv *, jobject, jobject);
 

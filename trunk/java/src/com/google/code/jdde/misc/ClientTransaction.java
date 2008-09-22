@@ -26,25 +26,28 @@ import com.google.code.jdde.ddeml.constants.DmlError;
  */
 public class ClientTransaction {
 
+	private final int idInst;
+	private final int hConv;
 	private final MessageLoop loop;
 	
 	private int error;
 	private int result;
 	private byte[] data;
 	
-	public ClientTransaction(MessageLoop loop) {
-		this.loop = loop;
+	public ClientTransaction(Conversation conversation) {
+		this.idInst = conversation.getIdInst();
+		this.hConv = conversation.getHConv();
+		this.loop = conversation.getLoop();
 	}
 	
-	public void call(int idInst, byte[] pData, int hConv, String hszItem,
-			int wFmt, int wType, int dwTimeout) {
+	public void call(byte[] pData, String hszItem, int wFmt, int wType,
+			int dwTimeout) {
 		
-		call(idInst, pData, hConv, hszItem, wFmt, wType, dwTimeout, null);
+		call(pData, hszItem, wFmt, wType, dwTimeout, null);
 	}
 	
-	public void call(final int idInst, final byte[] pData, final int hConv,
-			final String hszItem, final int wFmt, final int wType,
-			final int dwTimeout, final PosTransactionTask task) {
+	public void call(final byte[] pData, final String hszItem, final int wFmt,
+			final int wType, final int dwTimeout, final PosTransactionTask task) {
 		
 		loop.invokeAndWait(new Runnable() {
 			public void run() {

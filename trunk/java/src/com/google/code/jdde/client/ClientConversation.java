@@ -25,73 +25,46 @@ import java.util.logging.Logger;
 import com.google.code.jdde.client.event.AdviseDataListener;
 import com.google.code.jdde.client.event.AsyncTransactionCompletedListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
-import com.google.code.jdde.ddeml.DdeAPI;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.misc.ClientTransaction;
 import com.google.code.jdde.misc.ClipboardFormat;
-import com.google.code.jdde.misc.MessageLoop;
-import com.google.code.jdde.misc.PosTransactionTask;
+import com.google.code.jdde.misc.Conversation;
 import com.google.code.jdde.misc.JavaDdeUtil;
+import com.google.code.jdde.misc.PosTransactionTask;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class Conversation {
+public class ClientConversation extends Conversation {
 
 	private static Logger logger = JavaDdeUtil.getLogger();
 	
-	private int idInst;
-	private int hConv;
-	private MessageLoop loop;
 	private DdeClient client;
-	
-	private String service;
-	private String topic;
 	
 	private List<Advise> advises;
 	private Map<Integer, AsyncTransaction> transactions;
 	
-	Conversation(DdeClient client, int hConv, String service, String topic) {
-		this.hConv = hConv;
-		this.idInst = client.getIdInst();
-		this.loop = client.getLoop();
-		this.client = client;
+	ClientConversation(DdeClient client, int hConv, String service, String topic) {
+		super(client, hConv, service, topic);
 		
-		this.service = service;
-		this.topic = topic;
+		this.client = client;
 		
 		advises = new ArrayList<Advise>();
 		transactions = new HashMap<Integer, AsyncTransaction>();
 	}
 	
-	int getHandle() {
-		return hConv;
-	}
-	
-	public String getService() {
-		return service;
-	}
-	
-	public String getTopic() {
-		return topic;
-	}
-	
-	public void disconnect() {
-		loop.invokeAndWait(new Runnable() {
-			public void run() {
-				DdeAPI.Disconnect(hConv);					
-			}
-		});
-	}
+	/* ************************************ *
+	 ************* xtyp_request ************* 
+	 * ************************************ */
 	
 	public byte[] request(String item) {
 		return request(item, client.getDefaultFormat(), client.getDefaultTimeout());
 	}
 	
 	public byte[] request(String item, ClipboardFormat format, int timeout) {
-		ClientTransaction tx = new ClientTransaction(loop);
-		tx.call(idInst, null, hConv, item, format.getValue(), TransactionFlags.XTYP_REQUEST, timeout);
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(null, item, format.getValue(), TransactionFlags.XTYP_REQUEST, timeout);
 		
 		tx.throwExceptionOnError();
 		return tx.getData();
@@ -106,8 +79,8 @@ public class Conversation {
 		
 		AsyncTransactionTask task = new AsyncTransactionTask(listener);
 		
-		ClientTransaction tx = new ClientTransaction(loop);
-		tx.call(idInst, null, hConv, item, format.getValue(),
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(null, item, format.getValue(),
 				TransactionFlags.XTYP_REQUEST, TransactionFlags.TIMEOUT_ASYNC, task);
 		
 		tx.throwExceptionOnError();
@@ -115,28 +88,40 @@ public class Conversation {
 		return task.asyncTx;
 	}
 	
+	/* ************************************ *
+	 ************* xtyp_execute ************* 
+	 * ************************************ */
+	
 	public void execute(String command) {
 		execute(command, client.getDefaultTimeout());
 	}
 	
 	public void execute(String command, int timeout) {
-		ClientTransaction tx = new ClientTransaction(loop);
-		tx.call(idInst, command.getBytes(), hConv, null, ClipboardFormat.TEXT.getValue(),
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(command.getBytes(), null, ClipboardFormat.TEXT.getValue(),
 				TransactionFlags.XTYP_EXECUTE, timeout);
 
 		tx.throwExceptionOnError();
 	}
+	
+	/* ************************************ *
+	 ************** xtyp_poke *************** 
+	 * ************************************ */
 	
 	public void poke(String item, byte[] data) {
 		poke(item, data, client.getDefaultFormat(), client.getDefaultTimeout());
 	}
 	
 	public void poke(String item, byte[] data, ClipboardFormat format, int timeout) {
-		ClientTransaction tx = new ClientTransaction(loop);
-		tx.call(idInst, data, hConv, item, format.getValue(), TransactionFlags.XTYP_POKE, timeout);
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(data, item, format.getValue(), TransactionFlags.XTYP_POKE, timeout);
 		
 		tx.throwExceptionOnError();
 	}
+	
+	/* ************************************ *
+	 ************ xtyp_advstart ************* 
+	 * ************************************ */
 	
 	public Advise startAdvise(String item, AdviseDataListener listener) {
 		return startAdvise(item, client.getDefaultFormat(), client.getDefaultTimeout(), listener);
@@ -147,8 +132,8 @@ public class Conversation {
 		
 		StartAdviseTask task = new StartAdviseTask(item, format, listener);
 		
-		ClientTransaction tx = new ClientTransaction(loop);
-		tx.call(idInst, null, hConv, item, format.getValue(),
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(null, item, format.getValue(),
 				TransactionFlags.XTYP_ADVSTART, timeout, task);
 		
 		tx.throwExceptionOnError();
@@ -214,7 +199,7 @@ public class Conversation {
 
 		@Override
 		public void call(ClientTransaction clientTx) {
-			advise = new Advise(client, Conversation.this, item, format, listener);
+			advise = new Advise(client, ClientConversation.this, item, format, listener);
 			advises.add(advise);
 		}
 		
@@ -232,7 +217,7 @@ public class Conversation {
 		@Override
 		public void call(ClientTransaction clientTx) {
 			Integer txId = clientTx.getResult();
-			asyncTx = new AsyncTransaction(client, Conversation.this, txId, listener);
+			asyncTx = new AsyncTransaction(client, ClientConversation.this, txId, listener);
 
 			transactions.put(txId, asyncTx);
 		}

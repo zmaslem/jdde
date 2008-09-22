@@ -21,22 +21,13 @@
 #include "DdeAPI.h"
 #include "Util.h"
 
-#define iCodePage CP_WINANSI
-
-
 JNIEXPORT jbyteArray JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_ClientTransaction
   (JNIEnv *env, jclass cls, jint idInst, jbyteArray jpData, jint hConv, jstring jhszItem,
 		  jint wFmt, jint wType, jint dwTimeout, jobject $dwResult)
 {
-	HSZ hszItem = NULL;
+	HSZ hszItem = UtilCreateStringHandle(env, idInst, jhszItem);
 	HDDEDATA pData = NULL;
 	DWORD dwResult = 0;
-
-	if (jhszItem != NULL) {
-		const char *strItem = env->GetStringUTFChars(jhszItem, 0);
-		hszItem = DdeCreateStringHandle(idInst, strItem, iCodePage);
-		env->ReleaseStringUTFChars(jhszItem, strItem);
-	}
 
 	if (jpData != NULL) {
 		jsize cb = env->GetArrayLength(jpData);
@@ -60,9 +51,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_ClientTransa
 		DdeFreeDataHandle(pData);
 	}
 
-	if (hszItem != NULL) {
-		DdeFreeStringHandle(idInst, hszItem);
-	}
+	UtilFreeStringHandle(idInst, hszItem);
 
 	if ($dwResult != NULL) {
 		SetObjectInPointer(env, $dwResult, NewInteger(env, dwResult));
@@ -83,20 +72,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_ClientTransa
 JNIEXPORT jint JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_Connect
   (JNIEnv *env, jclass cls, jint idInst, jstring jhszService, jstring jhszTopic, jobject pCC)
 {
-	HSZ hszService = NULL;
-	HSZ hszTopic = NULL;
-
-	if (jhszService != NULL) {
-		const char *strService = env->GetStringUTFChars(jhszService, 0);
-		hszService = DdeCreateStringHandle(idInst, strService, iCodePage);
-		env->ReleaseStringUTFChars(jhszService, strService);
-	}
-
-	if (jhszTopic != NULL) {
-	    const char *strTopic = env->GetStringUTFChars(jhszTopic, 0);
-		hszTopic = DdeCreateStringHandle(idInst, strTopic, iCodePage);
-		env->ReleaseStringUTFChars(jhszTopic, strTopic);
-	}
+	HSZ hszService = UtilCreateStringHandle(env, idInst, jhszService);
+	HSZ hszTopic = UtilCreateStringHandle(env, idInst, jhszTopic);
 
 	HCONV hConv = DdeConnect(
 			idInst,					// instance identifier
@@ -104,13 +81,8 @@ JNIEXPORT jint JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_Connect
 			hszTopic,				// topic string handle
 			(PCONVCONTEXT) NULL);	// use default context
 
-	if (hszService != NULL) {
-		DdeFreeStringHandle(idInst, hszService);
-	}
-
-	if (hszTopic != NULL) {
-		DdeFreeStringHandle(idInst, hszTopic);
-	}
+	UtilFreeStringHandle(idInst, hszService);
+	UtilFreeStringHandle(idInst, hszTopic);
 
 	return (UINT) hConv;
 }
@@ -145,15 +117,27 @@ JNIEXPORT jint JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_Initialize
 JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_NameService
   (JNIEnv *env, jclass cls, jint idInst, jstring jhsz1, jint afCmd)
 {
-	const char *str1 = env->GetStringUTFChars(jhsz1, 0);
-	HSZ hsz1 = DdeCreateStringHandle(idInst, str1, iCodePage);
-	env->ReleaseStringUTFChars(jhsz1, str1);
+	HSZ hsz1 = UtilCreateStringHandle(env, idInst, jhsz1);
 
 	HDDEDATA data = DdeNameService(idInst, hsz1, 0L, afCmd);
 
-	DdeFreeStringHandle(idInst, hsz1);
+	UtilFreeStringHandle(idInst, hsz1);
 
 	return data != NULL;
+}
+
+JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_PostAdvise
+  (JNIEnv *env, jclass cls, jint idInst, jstring jhszTopic, jstring jhszItem)
+{
+	HSZ hszTopic = UtilCreateStringHandle(env, idInst, jhszTopic);
+	HSZ hszItem = UtilCreateStringHandle(env, idInst, jhszItem);
+
+	BOOL result = DdePostAdvise(idInst, hszTopic, hszItem);
+
+	UtilFreeStringHandle(idInst, hszTopic);
+	UtilFreeStringHandle(idInst, hszItem);
+
+	return result;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_Uninitialize
@@ -220,7 +204,15 @@ HDDEDATA CALLBACK DdeCallback(
 	case XTYP_ADVREQ:
 	case XTYP_REQUEST:
 	case XTYP_WILDCONNECT:
-		jobject cbResult = env->CallStaticObjectMethod(CallbackManager, mDataCallback, parameter);
+		jobject jobj = env->CallStaticObjectMethod(CallbackManager, mDataCallback, parameter);
+		jbyteArray bArray = (jbyteArray) jobj;
+
+		if (bArray != NULL) {
+			jsize cb = env->GetArrayLength(bArray);
+			jbyte *pSrc = env->GetByteArrayElements(bArray, 0);
+			result = DdeCreateDataHandle(idInst, (LPBYTE) pSrc, cb, 0, hsz2, uFmt, 0);
+			env->ReleaseByteArrayElements(bArray, pSrc, 0);
+		}
 		break;
 	case XTYP_ADVDATA:
 	case XTYP_EXECUTE:
@@ -237,6 +229,10 @@ HDDEDATA CALLBACK DdeCallback(
 	case XTYP_UNREGISTER:
 		env->CallStaticVoidMethod(CallbackManager, mNotificationCallback, parameter);
 		break;
+	}
+
+	if (env->ExceptionOccurred()) {
+		PostThreadMessage(GetCurrentThreadId(), 0x7F7F, 0, 0);
 	}
 
 	env->PopLocalFrame(NULL);
