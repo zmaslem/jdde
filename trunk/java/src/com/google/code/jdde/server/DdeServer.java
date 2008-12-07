@@ -72,7 +72,7 @@ public class DdeServer extends DdeApplication {
 		invokeNameService(service, NameServiceFlags.DNS_UNREGISTER);
 	}
 	
-	public void unresiterAllServices() {
+	public void unregisterAllServices() {
 		invokeNameService(null, NameServiceFlags.DNS_UNREGISTER);
 	}
 	
