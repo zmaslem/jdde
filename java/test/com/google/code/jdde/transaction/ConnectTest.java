@@ -173,7 +173,7 @@ public class ConnectTest extends JavaDdeTest {
 		client.connect("TestService1", "TestTopic").disconnect();
 		client.connect("TestService2", "TestTopic").disconnect();
 		
-		server.unresiterAllServices();
+		server.unregisterAllServices();
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
 				fail();
