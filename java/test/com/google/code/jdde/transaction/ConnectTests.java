@@ -33,7 +33,7 @@ import com.google.code.jdde.server.event.ConnectionAdapter;
  * 
  * @author Vitor Costa
  */
-public class ConnectTest extends JavaDdeTest {
+public class ConnectTests extends JavaDdeTest {
 
 	@Test
 	public void serverReceivesCorrectParameters() {

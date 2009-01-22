@@ -16,22 +16,14 @@
 
 package com.google.code.jdde.server;
 
-import java.util.logging.Logger;
-
-import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.DdeAPI;
-import com.google.code.jdde.ddeml.DdeCallback;
 import com.google.code.jdde.ddeml.Pointer;
 import com.google.code.jdde.ddeml.constants.DmlError;
-import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
 import com.google.code.jdde.ddeml.constants.NameServiceFlags;
-import com.google.code.jdde.ddeml.constants.TransactionFlags;
-import com.google.code.jdde.event.ConnectConfirmEvent;
-import com.google.code.jdde.event.ConnectEvent;
 import com.google.code.jdde.misc.DdeApplication;
-import com.google.code.jdde.misc.JavaDdeUtil;
 import com.google.code.jdde.server.event.ConnectionListener;
+import com.google.code.jdde.server.event.ServerRegistrationListener;
 import com.google.code.jdde.server.event.TransactionListener;
 
 /**
@@ -40,29 +32,52 @@ import com.google.code.jdde.server.event.TransactionListener;
  */
 public class DdeServer extends DdeApplication {
 
-	private static Logger logger = JavaDdeUtil.getLogger();
-	
 	private ConnectionListener connectionListener;
 	private TransactionListener transactionListener;
+	private ServerRegistrationListener registrationListener;
 	
 	public DdeServer() {
 		this(0);
 	}
 	
 	public DdeServer(int initializeFlags) {
-		initialize(new ServerCallbackImpl(), 
+		initialize(new ServerCallbackImpl(this), 
 				InitializeFlags.APPCLASS_STANDARD |
 				InitializeFlags.APPCMD_FILTERINITS |
 				initializeFlags);
 	}
 	
+	/* ************************************ *
+	 ********* getters and setters ********** 
+	 * ************************************ */
+	
 	public void setConnectionListener(ConnectionListener connectionListener) {
 		this.connectionListener = connectionListener;
+	}
+	
+	public ConnectionListener getConnectionListener() {
+		return connectionListener;
 	}
 	
 	public void setTransactionListener(TransactionListener transactionListener) {
 		this.transactionListener = transactionListener;
 	}
+	
+	public TransactionListener getTransactionListener() {
+		return transactionListener;
+	}
+	
+	public void setRegistrationListener(ServerRegistrationListener registrationListener) {
+		this.registrationListener = registrationListener;
+	}
+	
+	public ServerRegistrationListener getRegistrationListener() {
+		return registrationListener;
+	}
+	
+	/* ************************************ *
+	 *********** ddeml api calls ************ 
+	 * ************************************ */
 	
 	public void registerService(String service) {
 		invokeNameService(service, NameServiceFlags.DNS_REGISTER);
@@ -113,116 +128,12 @@ public class DdeServer extends DdeApplication {
 		return (ServerConversation) super.findConversation(conv);
 	}
 	
-	private class ServerCallbackImpl implements DdeCallback {
-
-		@Override
-		public boolean DdeBooleanCallback(CallbackParameters parameters) {
-			boolean result = false;
-			
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_ADVSTART:
-				
-				break;
-			case TransactionFlags.XTYP_CONNECT:
-				ConnectEvent event = new ConnectEvent(DdeServer.this, parameters);
-
-				if (connectionListener != null) {
-					result = connectionListener.onConnect(event);
-				}
-				break;
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeServer should never receive a boolean callback of type " + tx);
-				break;
-			}
-			
-			return result;
-		}
-
-		@Override
-		public byte[] DdeDataCallback(CallbackParameters parameters) {
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_ADVREQ:
-				
-				break;
-			case TransactionFlags.XTYP_REQUEST:
-				ServerConversation conversation = findConversation(parameters.getHconv());
-				if (conversation != null) {
-					return conversation.fireOnRequest(parameters);
-				}
-				break;
-			case TransactionFlags.XTYP_WILDCONNECT:
-				
-				break;
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeServer should never receive a data callback of type " + tx);
-				break;
-			}
-			return null;
-		}
-
-		@Override
-		public FlagCallbackResult DdeFlagCallback(CallbackParameters parameters) {
-			ServerConversation conversation = findConversation(parameters.getHconv());
-			if (conversation == null) {
-				return FlagCallbackResult.DDE_FNOTPROCESSED;
-			}
-			
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_EXECUTE:
-				return conversation.fireOnExecute(parameters);
-			case TransactionFlags.XTYP_POKE:
-				return conversation.fireOnPoke(parameters);
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeServer should never receive a flag callback of type " + tx);
-				return FlagCallbackResult.DDE_FNOTPROCESSED;
-			}
-		}
-
-		@Override
-		public void DdeNotificationCallback(CallbackParameters parameters) {
-			ServerConversation conversation = null;
-			
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_ADVSTOP:
-				
-				break;
-			case TransactionFlags.XTYP_CONNECT_CONFIRM:
-				ConnectConfirmEvent event = new ConnectConfirmEvent(DdeServer.this, parameters);
-				
-				conversation = event.getConversation();
-				conversation.setTransactionListener(transactionListener);
-				
-				conversations.add(conversation);
-				
-				if (connectionListener != null) {
-					connectionListener.onConnectConfirm(event);
-				}
-				break;
-			case TransactionFlags.XTYP_DISCONNECT:
-				conversation = findConversation(parameters.getHconv());
-				if (conversation != null) {
-					conversation.fireOnDisconnect(parameters);
-				}
-				break;
-			case TransactionFlags.XTYP_ERROR:
-				
-				break;
-			case TransactionFlags.XTYP_REGISTER:
-				
-				break;
-			case TransactionFlags.XTYP_UNREGISTER:
-				
-				break;
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeServer should never receive a notification callback of type " + tx);
-				break;
-			}
-		}
-
+	/* ************************************ *
+	 ************ helper methods ************ 
+	 * ************************************ */
+	
+	void addConversation(ServerConversation conversation) {
+		conversations.add(conversation);
 	}
 	
 }

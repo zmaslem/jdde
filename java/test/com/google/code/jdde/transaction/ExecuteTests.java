@@ -22,9 +22,9 @@ import com.google.code.jdde.JavaDdeTest;
 import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.ddeml.constants.DmlError;
+import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
-import com.google.code.jdde.event.RequestEvent;
-import com.google.code.jdde.misc.ClipboardFormat;
+import com.google.code.jdde.event.ExecuteEvent;
 import com.google.code.jdde.misc.DdeException;
 import com.google.code.jdde.server.DdeServer;
 import com.google.code.jdde.server.event.TransactionAdapter;
@@ -33,48 +33,46 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  * 
  * @author Vitor Costa
  */
-public class RequestTest extends JavaDdeTest {
+public class ExecuteTests extends JavaDdeTest {
 
 	private String service	= "TestService";
 	private String topic	= "TestTopic";
-	private String item		= "TestItem";
-	private byte[] data		= new byte[] {2, 4, 6, 8};
+	private String command	= "[SOME.COMMAND()]";
 	
 	@Test
 	public void serverReceivesCorrectParameters() {
 		DdeServer server = newOpenServer(service);
 		server.setTransactionListener(new TransactionAdapter() {
-			public byte[] onRequest(RequestEvent e) {
+			public FlagCallbackResult onExecute(ExecuteEvent e) {
 				assertNotNull(e.getConversation());
 				assertEquals(service, e.getConversation().getService());
 				assertEquals(topic, e.getConversation().getTopic());
-				assertEquals(item, e.getItem());
-				assertEquals(ClipboardFormat.TEXT, e.getFormat());
-				return data;
+				assertEquals(command, e.getCommand());
+				return FlagCallbackResult.DDE_FACK;
 			}
 		});
 		
 		DdeClient client = newClient();
 		ClientConversation conv = client.connect(service, topic);
-		conv.request(item);
+		conv.execute(command);
 	}
 	
 	@Test
-	public void serverDoesNotListenWhenUsingFailRequests() {
+	public void serverDoesNotListenWhenUsingFailExecutes() {
 		DdeServer server = newOpenServer(
-				InitializeFlags.CBF_FAIL_REQUESTS, service);
+				InitializeFlags.CBF_FAIL_EXECUTES, service);
 		
 		server.setTransactionListener(new TransactionAdapter() {
-			public byte[] onRequest(RequestEvent e) {
+			public FlagCallbackResult onExecute(ExecuteEvent e) {
 				fail();
-				return null;
+				return FlagCallbackResult.DDE_FACK;
 			}
 		});
 		
 		DdeClient client = newClient();
 		ClientConversation conv = client.connect(service, topic);
 		try {
-			conv.request(item);
+			conv.execute(command);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NOTPROCESSED, e.getError());
@@ -82,41 +80,55 @@ public class RequestTest extends JavaDdeTest {
 	}
 	
 	@Test
-	public void clientReceivesCorrectResult() {
+	public void clientSucceedsWhenServerAcknowledgesTheTransaction() {
 		DdeServer server = newOpenServer(service);
 		server.setTransactionListener(new TransactionAdapter() {
-			public byte[] onRequest(RequestEvent e) {
-				return data;
+			public FlagCallbackResult onExecute(ExecuteEvent e) {
+				return FlagCallbackResult.DDE_FACK;
 			}
 		});
 		
 		DdeClient client = newClient();
 		ClientConversation conv = client.connect(service, topic);
-		byte[] result = conv.request(item);
-		
-		assertEquals(data.length, result.length);
-		for (int i = 0; i < data.length; i++) {
-			assertEquals(data[i], result[i]);
-		}
+		conv.execute(command);
 	}
 	
 	@Test
-	public void clientFailsWhenServerReturnsNoData() {
+	public void clientFailsWhenServerIsBusy() {
 		DdeServer server = newOpenServer(service);
 		server.setTransactionListener(new TransactionAdapter() {
-			public byte[] onRequest(RequestEvent e) {
-				return null;
+			public FlagCallbackResult onExecute(ExecuteEvent e) {
+				return FlagCallbackResult.DDE_FBUSY;
 			}
 		});
 		
 		DdeClient client = newClient();
 		ClientConversation conv = client.connect(service, topic);
 		try {
-			conv.request(item);
+			conv.execute(command);
+			fail();
+		} catch (DdeException e) {
+			assertEquals(DmlError.BUSY, e.getError());
+		}
+	}
+	
+	@Test
+	public void clientFailsWhenServerDoesNotProcessTheTransaction() {
+		DdeServer server = newOpenServer(service);
+		server.setTransactionListener(new TransactionAdapter() {
+			public FlagCallbackResult onExecute(ExecuteEvent e) {
+				return FlagCallbackResult.DDE_FNOTPROCESSED;
+			}
+		});
+		
+		DdeClient client = newClient();
+		ClientConversation conv = client.connect(service, topic);
+		try {
+			conv.execute(command);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NOTPROCESSED, e.getError());
 		}
 	}
-
+	
 }

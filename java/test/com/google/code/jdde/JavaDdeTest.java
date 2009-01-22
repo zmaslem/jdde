@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,6 +64,10 @@ public class JavaDdeTest extends Assert {
 			try {
 				latch.await(1000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {}
+			
+			if (latch.getCount() > 0) {
+				throw new AssertionFailedError("countdown latch is not empty");
+			}
 		}
 		
 		for (DdeClient client : clients) {

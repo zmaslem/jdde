@@ -22,6 +22,8 @@ import com.google.code.jdde.ddeml.Pointer;
 /**
  * 
  * @author Vitor Costa
+ *
+ * @param <A>
  */
 public abstract class Conversation {
 
@@ -41,14 +43,10 @@ public abstract class Conversation {
 		this.topic = topic;
 	}
 
-	public int getIdInst() {
-		return application.getIdInst();
+	public DdeApplication getApplication() {
+		return application;
 	}
 	
-	public MessageLoop getLoop() {
-		return application.getLoop();
-	}
-
 	public int getHConv() {
 		return hConv;
 	}
@@ -64,7 +62,7 @@ public abstract class Conversation {
 	public boolean disconnect() {
 		final Pointer<Boolean> result = new Pointer<Boolean>();
 		
-		getLoop().invokeAndWait(new Runnable() {
+		application.getLoop().invokeAndWait(new Runnable() {
 			public void run() {
 				result.value = DdeAPI.Disconnect(hConv);
 			}

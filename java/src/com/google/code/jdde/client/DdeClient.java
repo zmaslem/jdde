@@ -16,10 +16,9 @@
 
 package com.google.code.jdde.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.code.jdde.client.event.ClientRegistrationListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.DdeAPI;
 import com.google.code.jdde.ddeml.DdeCallback;
@@ -28,6 +27,8 @@ import com.google.code.jdde.ddeml.constants.DmlError;
 import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
+import com.google.code.jdde.event.RegisterEvent.ClientRegisterEvent;
+import com.google.code.jdde.event.UnregisterEvent.ClientUnregisterEvent;
 import com.google.code.jdde.misc.ClipboardFormat;
 import com.google.code.jdde.misc.DdeApplication;
 import com.google.code.jdde.misc.JavaDdeUtil;
@@ -43,11 +44,9 @@ public class DdeClient extends DdeApplication {
 	private int defaultTimeout;
 	private ClipboardFormat defaultFormat;
 	
-	private List<ClientConversation> conversations;
+	private ClientRegistrationListener registrationListener;
 	
 	public DdeClient() {
-		conversations = new ArrayList<ClientConversation>();
-		
 		defaultTimeout = 9999;
 		defaultFormat = ClipboardFormat.TEXT;
 		
@@ -71,6 +70,10 @@ public class DdeClient extends DdeApplication {
 	public void setDefaultFormat(ClipboardFormat defaultFormat) {
 		this.defaultFormat = defaultFormat;
 	}
+	
+	public void setRegistrationListener(ClientRegistrationListener registrationListener) {
+		this.registrationListener = registrationListener;
+	}
 
 	public ClientConversation connect(final String service, final String topic) {
 		final Pointer<Integer> error = new Pointer<Integer>();
@@ -93,15 +96,10 @@ public class DdeClient extends DdeApplication {
 		
 		return conversation;
 	}
-	
+
+	@Override
 	public ClientConversation findConversation(int hConv) {
-		for (int i = 0; i < conversations.size(); i++) {
-			ClientConversation conversation = conversations.get(i);
-			if (hConv == conversation.getHConv()) {
-				return conversation;
-			}
-		}
-		return null;
+		return (ClientConversation) super.findConversation(hConv);
 	}
 
 	private class ClientCallbackImpl implements DdeCallback {
@@ -125,9 +123,6 @@ public class DdeClient extends DdeApplication {
 				if (conversation != null) {
 					conversation.fireValueChanged(parameters);
 				}
-				else {
-					logger.warning("Conversation " + parameters.getHconv() + " hasn't been found");
-				}
 				break;
 			default:
 				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
@@ -140,7 +135,7 @@ public class DdeClient extends DdeApplication {
 	
 		@Override
 		public void DdeNotificationCallback(CallbackParameters parameters) {
-			ClientConversation conversation = findConversation(parameters.getHconv());
+			ClientConversation conversation = null;
 			
 			switch (parameters.getUType()) {
 			case TransactionFlags.XTYP_DISCONNECT:
@@ -149,12 +144,22 @@ public class DdeClient extends DdeApplication {
 			case TransactionFlags.XTYP_ERROR:
 				
 				break;
+			case TransactionFlags.XTYP_REGISTER:
+				if (registrationListener != null) {
+					ClientRegisterEvent event = new ClientRegisterEvent(DdeClient.this, parameters);
+					registrationListener.onRegister(event);
+				}
+				break;
+			case TransactionFlags.XTYP_UNREGISTER:
+				if (registrationListener != null) {
+					ClientUnregisterEvent event = new ClientUnregisterEvent(DdeClient.this, parameters);
+					registrationListener.onUnregister(event);
+				}
+				break;
 			case TransactionFlags.XTYP_XACT_COMPLETE:
+				conversation = findConversation(parameters.getHconv());
 				if (conversation != null) {
 					conversation.fireAsyncTransactionCompleted(parameters);
-				}
-				else {
-					logger.warning("Conversation " + parameters.getHconv() + " hasn't been found");
 				}
 				break;
 			default:
