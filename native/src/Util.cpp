@@ -134,6 +134,10 @@ jobject WrapCallbackParameters(
 	}
 
 	switch (uType) {
+	case XTYP_ADVREQ:
+		jdwData1 = NewInteger(env, LOWORD(dwData1));
+		// dwData2 is not used
+		break;
 	case XTYP_CONNECT:
 		//jdwData1 = CONVCONTEXT
 		jdwData2 = NewBoolean(env, dwData2);
@@ -150,9 +154,14 @@ jobject WrapCallbackParameters(
 	}
 
 	// the following transactions don't use dwData1 nor dwData2:
+	// XTYP_ADVDATA
+	// XTYP_ADVSTART
+	// XTYP_ADVSTOP
 	// XTYP_EXECUTE
 	// XTYP_POKE
+	// XTYP_REGISTER
 	// XTYP_REQUEST
+	// XTYP_UNREGISTER
 
 	return NewObject(env,
 			"Lcom/google/code/jdde/ddeml/CallbackParameters;",
