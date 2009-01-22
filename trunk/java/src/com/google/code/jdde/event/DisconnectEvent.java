@@ -29,7 +29,7 @@ import com.google.code.jdde.server.ServerConversation;
  * @param <A>
  * @param <C>
  */
-public class DisconnectEvent<A extends DdeApplication, C extends Conversation>
+public abstract class DisconnectEvent<A extends DdeApplication, C extends Conversation>
 		extends ConversationEvent<A, C> {
 
 	private final boolean sameInstance;

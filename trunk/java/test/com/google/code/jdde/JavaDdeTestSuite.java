@@ -20,10 +20,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.google.code.jdde.transaction.ConnectTest;
-import com.google.code.jdde.transaction.ExecuteTest;
-import com.google.code.jdde.transaction.PokeTest;
-import com.google.code.jdde.transaction.RequestTest;
+import com.google.code.jdde.transaction.AdviseTests;
+import com.google.code.jdde.transaction.ConnectTests;
+import com.google.code.jdde.transaction.ExecuteTests;
+import com.google.code.jdde.transaction.PokeTests;
+import com.google.code.jdde.transaction.RegisterTests;
+import com.google.code.jdde.transaction.RequestTests;
 
 /**
  * 
@@ -31,10 +33,12 @@ import com.google.code.jdde.transaction.RequestTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-	ConnectTest.class,
-	ExecuteTest.class,
-	PokeTest.class,
-	RequestTest.class
+	AdviseTests.class,
+	ConnectTests.class,
+	ExecuteTests.class,
+	PokeTests.class,
+	RegisterTests.class,
+	RequestTests.class
 })
 public class JavaDdeTestSuite {
 

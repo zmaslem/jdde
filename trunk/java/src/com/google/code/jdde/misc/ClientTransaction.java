@@ -35,9 +35,9 @@ public class ClientTransaction {
 	private byte[] data;
 	
 	public ClientTransaction(Conversation conversation) {
-		this.idInst = conversation.getIdInst();
+		this.idInst = conversation.getApplication().getIdInst();
 		this.hConv = conversation.getHConv();
-		this.loop = conversation.getLoop();
+		this.loop = conversation.getApplication().getLoop();
 	}
 	
 	public void call(byte[] pData, String hszItem, int wFmt, int wType,

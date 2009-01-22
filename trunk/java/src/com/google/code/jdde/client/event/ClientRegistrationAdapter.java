@@ -14,29 +14,25 @@
  * the License.
  */
 
-package com.google.code.jdde.event;
+package com.google.code.jdde.client.event;
 
-import com.google.code.jdde.ddeml.CallbackParameters;
-import com.google.code.jdde.server.DdeServer;
-import com.google.code.jdde.server.ServerConversation;
+import com.google.code.jdde.event.RegisterEvent.ClientRegisterEvent;
+import com.google.code.jdde.event.UnregisterEvent.ClientUnregisterEvent;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class ConnectConfirmEvent extends ConversationEvent<DdeServer, ServerConversation> {
+public class ClientRegistrationAdapter implements ClientRegistrationListener {
 
-	private final boolean sameInstance;
-	
-	public ConnectConfirmEvent(DdeServer server,
-			ServerConversation conversation, CallbackParameters parameters) {
-		super(server, conversation);
+	@Override
+	public void onRegister(ClientRegisterEvent e) {
 		
-		this.sameInstance = (Boolean) parameters.getDwData2();
 	}
 	
-	public boolean isSameInstance() {
-		return sameInstance;
+	@Override
+	public void onUnregister(ClientUnregisterEvent e) {
+		
 	}
 	
 }

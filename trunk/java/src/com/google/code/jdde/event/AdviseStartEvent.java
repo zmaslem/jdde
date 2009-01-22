@@ -17,6 +17,7 @@
 package com.google.code.jdde.event;
 
 import com.google.code.jdde.ddeml.CallbackParameters;
+import com.google.code.jdde.misc.ClipboardFormat;
 import com.google.code.jdde.server.DdeServer;
 import com.google.code.jdde.server.ServerConversation;
 
@@ -26,10 +27,31 @@ import com.google.code.jdde.server.ServerConversation;
  */
 public class AdviseStartEvent extends ConversationEvent<DdeServer, ServerConversation> {
 
+	private String topic;
+	private String item;
+	
+	private ClipboardFormat format;
+	
 	public AdviseStartEvent(DdeServer server, ServerConversation conversation,
 			CallbackParameters parameters) {
 		super(server, conversation);
-		//TODO rest of parameters
+
+		format = new ClipboardFormat(parameters.getUFmt());
+		
+		topic = parameters.getHsz1();
+		item = parameters.getHsz2();
+	}
+	
+	public String getTopic() {
+		return topic;
+	}
+
+	public String getItem() {
+		return item;
+	}
+
+	public ClipboardFormat getFormat() {
+		return format;
 	}
 	
 }

@@ -34,7 +34,7 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  * 
  * @author Vitor Costa
  */
-public class PokeTest extends JavaDdeTest {
+public class PokeTests extends JavaDdeTest {
 
 	private String service	= "TestService";
 	private String topic	= "TestTopic";
