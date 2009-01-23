@@ -9,6 +9,25 @@ _missing_
 
 _missing_
 
+== Identifying conversation disconnects ==
+
+If you need to identify when a conversation has been disconnected you can register a `ClientDisconnectListener` like this:
+
+{{{
+String service, topic;
+
+...
+
+DdeClient client = new DdeClient();
+ClientConversation conv = client.connect(service, topic);
+conv.setDisconnectListener(new ClientDisconnectListener() {
+	public void onDisconnect(ClientDisconnectEvent e) {
+		...
+		// do whatever you want when conversation is disconnected
+	}
+});
+}}}
+
 = Transaction Management =
 
 After establishing a conversation with a server, a client can send transactions to obtain data and services from the server. These transactions are listed below.
@@ -78,7 +97,7 @@ advise.stop();
 byte[] data = advise.getLastValue();
 }}}
 
-There is also an overloaded method that allows you to specify the clipboard format and timeout of the transaction.
+There is also an overloaded method that allows you to specify the clipboard format and timeout of the transaction. If the server rejected the transaction, a `DmlError.NOTPROCESSED` will be thrown.
 
 == Execute Transaction ==
 
