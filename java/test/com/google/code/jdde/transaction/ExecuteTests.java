@@ -18,7 +18,7 @@ package com.google.code.jdde.transaction;
 
 import org.junit.Test;
 
-import com.google.code.jdde.JavaDdeTest;
+import com.google.code.jdde.JavaDdeTests;
 import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.ddeml.constants.DmlError;
@@ -33,11 +33,9 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  * 
  * @author Vitor Costa
  */
-public class ExecuteTests extends JavaDdeTest {
+public class ExecuteTests extends JavaDdeTests {
 
-	private String service	= "TestService";
-	private String topic	= "TestTopic";
-	private String command	= "[SOME.COMMAND()]";
+	private String command = "[SOME.COMMAND()]";
 	
 	@Test
 	public void serverReceivesCorrectParameters() {

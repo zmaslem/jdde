@@ -19,7 +19,7 @@ package com.google.code.jdde.transaction;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.code.jdde.JavaDdeTest;
+import com.google.code.jdde.JavaDdeTests;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.client.event.ClientRegistrationAdapter;
 import com.google.code.jdde.event.ConnectEvent;
@@ -35,11 +35,8 @@ import com.google.code.jdde.server.event.ServerRegistrationAdapter;
  * 
  * @author Vitor Costa
  */
-public class RegisterTests extends JavaDdeTest {
+public class RegisterTests extends JavaDdeTests {
 
-	private String service	= "TestService";
-	private String topic	= "TestTopic";
-	
 	@Test
 	public void serverReceivesRegisterEvent() throws Exception {
 		startTest(1);

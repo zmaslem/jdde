@@ -18,7 +18,7 @@ package com.google.code.jdde.transaction;
 
 import org.junit.Test;
 
-import com.google.code.jdde.JavaDdeTest;
+import com.google.code.jdde.JavaDdeTests;
 import com.google.code.jdde.client.Advise;
 import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
@@ -38,12 +38,9 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  * 
  * @author Vitor Costa
  */
-public class AdviseTests extends JavaDdeTest {
+public class AdviseTests extends JavaDdeTests {
 
-	private String service	= "TestService";
-	private String topic	= "TestTopic";
-	private String item		= "TestItem";
-	private byte[] data		= new byte[] {2, 4, 6, 8};
+	private byte[] data = new byte[] {2, 4, 6, 8};
 	
 	@Test
 	public void serverReceivesCorrectParameters() {
