@@ -36,8 +36,12 @@ import com.google.code.jdde.server.event.ConnectionAdapter;
  * 
  * @author Vitor Costa
  */
-public class JavaDdeTest extends Assert {
+public class JavaDdeTests extends Assert {
 
+	protected String service	= "TestService";
+	protected String topic		= "TestTopic";
+	protected String item		= "TestItem";
+	
 	private CountDownLatch latch;
 	
 	private List<DdeClient> clients = new ArrayList<DdeClient>();

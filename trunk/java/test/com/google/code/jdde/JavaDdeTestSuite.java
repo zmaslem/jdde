@@ -22,6 +22,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import com.google.code.jdde.transaction.AdviseTests;
 import com.google.code.jdde.transaction.ConnectTests;
+import com.google.code.jdde.transaction.DisconnectTests;
 import com.google.code.jdde.transaction.ExecuteTests;
 import com.google.code.jdde.transaction.PokeTests;
 import com.google.code.jdde.transaction.RegisterTests;
@@ -35,6 +36,7 @@ import com.google.code.jdde.transaction.RequestTests;
 @SuiteClasses({
 	AdviseTests.class,
 	ConnectTests.class,
+	DisconnectTests.class,
 	ExecuteTests.class,
 	PokeTests.class,
 	RegisterTests.class,

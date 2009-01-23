@@ -16,6 +16,8 @@
 
 package com.google.code.jdde.event;
 
+import com.google.code.jdde.client.ClientConversation;
+import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.misc.Conversation;
 import com.google.code.jdde.misc.DdeApplication;
@@ -44,20 +46,20 @@ public abstract class DisconnectEvent<A extends DdeApplication, C extends Conver
 		return sameInstance;
 	}
 	
-	public static class ClientDisconnectEvent extends DisconnectEvent<DdeServer, ServerConversation> {
+	public static class ClientDisconnectEvent extends DisconnectEvent<DdeClient, ClientConversation> {
 		
-		public ClientDisconnectEvent(DdeServer application,
-				ServerConversation conversation, CallbackParameters parameters) {
-			super(application, conversation, parameters);
+		public ClientDisconnectEvent(DdeClient client,
+				ClientConversation conversation, CallbackParameters parameters) {
+			super(client, conversation, parameters);
 		}
 		
 	}
 
 	public static class ServerDisconnectEvent extends DisconnectEvent<DdeServer, ServerConversation> {
 		
-		public ServerDisconnectEvent(DdeServer application,
+		public ServerDisconnectEvent(DdeServer server,
 				ServerConversation conversation, CallbackParameters parameters) {
-			super(application, conversation, parameters);
+			super(server, conversation, parameters);
 		}
 		
 	}

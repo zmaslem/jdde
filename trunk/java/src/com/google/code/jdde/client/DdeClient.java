@@ -16,22 +16,13 @@
 
 package com.google.code.jdde.client;
 
-import java.util.logging.Logger;
-
 import com.google.code.jdde.client.event.ClientRegistrationListener;
-import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.DdeAPI;
-import com.google.code.jdde.ddeml.DdeCallback;
 import com.google.code.jdde.ddeml.Pointer;
 import com.google.code.jdde.ddeml.constants.DmlError;
-import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
-import com.google.code.jdde.ddeml.constants.TransactionFlags;
-import com.google.code.jdde.event.RegisterEvent.ClientRegisterEvent;
-import com.google.code.jdde.event.UnregisterEvent.ClientUnregisterEvent;
 import com.google.code.jdde.misc.ClipboardFormat;
 import com.google.code.jdde.misc.DdeApplication;
-import com.google.code.jdde.misc.JavaDdeUtil;
 
 /**
  * 
@@ -39,8 +30,6 @@ import com.google.code.jdde.misc.JavaDdeUtil;
  */
 public class DdeClient extends DdeApplication {
 
-	private static Logger logger = JavaDdeUtil.getLogger();
-	
 	private int defaultTimeout;
 	private ClipboardFormat defaultFormat;
 	
@@ -50,7 +39,7 @@ public class DdeClient extends DdeApplication {
 		defaultTimeout = 9999;
 		defaultFormat = ClipboardFormat.TEXT;
 		
-		initialize(new ClientCallbackImpl(), 
+		initialize(new ClientCallbackImpl(this), 
 				InitializeFlags.APPCLASS_STANDARD |
 				InitializeFlags.APPCMD_CLIENTONLY);
 	}
@@ -73,6 +62,10 @@ public class DdeClient extends DdeApplication {
 	
 	public void setRegistrationListener(ClientRegistrationListener registrationListener) {
 		this.registrationListener = registrationListener;
+	}
+	
+	public ClientRegistrationListener getRegistrationListener() {
+		return registrationListener;
 	}
 
 	public ClientConversation connect(final String service, final String topic) {
@@ -102,72 +95,4 @@ public class DdeClient extends DdeApplication {
 		return (ClientConversation) super.findConversation(hConv);
 	}
 
-	private class ClientCallbackImpl implements DdeCallback {
-		@Override
-		public boolean DdeBooleanCallback(CallbackParameters parameters) {
-			logger.warning("DdeClient should never receive a boolean callback");
-			return false;
-		}
-	
-		@Override
-		public byte[] DdeDataCallback(CallbackParameters parameters) {
-			logger.warning("DdeClient should never receive a data callback");
-			return null;
-		}
-	
-		@Override
-		public FlagCallbackResult DdeFlagCallback(CallbackParameters parameters) {
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_ADVDATA:
-				ClientConversation conversation = findConversation(parameters.getHconv());
-				if (conversation != null) {
-					conversation.fireValueChanged(parameters);
-				}
-				break;
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeClient should never receive a flag callback of type " + tx);
-				break;
-			}
-
-			return FlagCallbackResult.DDE_FACK;
-		}
-	
-		@Override
-		public void DdeNotificationCallback(CallbackParameters parameters) {
-			ClientConversation conversation = null;
-			
-			switch (parameters.getUType()) {
-			case TransactionFlags.XTYP_DISCONNECT:
-				
-				break;
-			case TransactionFlags.XTYP_ERROR:
-				
-				break;
-			case TransactionFlags.XTYP_REGISTER:
-				if (registrationListener != null) {
-					ClientRegisterEvent event = new ClientRegisterEvent(DdeClient.this, parameters);
-					registrationListener.onRegister(event);
-				}
-				break;
-			case TransactionFlags.XTYP_UNREGISTER:
-				if (registrationListener != null) {
-					ClientUnregisterEvent event = new ClientUnregisterEvent(DdeClient.this, parameters);
-					registrationListener.onUnregister(event);
-				}
-				break;
-			case TransactionFlags.XTYP_XACT_COMPLETE:
-				conversation = findConversation(parameters.getHconv());
-				if (conversation != null) {
-					conversation.fireAsyncTransactionCompleted(parameters);
-				}
-				break;
-			default:
-				String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
-				logger.warning("DdeClient should never receive a notification callback of type " + tx);
-				break;
-			}
-		}
-	}
-	
 }

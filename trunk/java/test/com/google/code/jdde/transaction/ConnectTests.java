@@ -18,7 +18,7 @@ package com.google.code.jdde.transaction;
 
 import org.junit.Test;
 
-import com.google.code.jdde.JavaDdeTest;
+import com.google.code.jdde.JavaDdeTests;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.ddeml.constants.DmlError;
 import com.google.code.jdde.ddeml.constants.InitializeFlags;
@@ -33,38 +33,38 @@ import com.google.code.jdde.server.event.ConnectionAdapter;
  * 
  * @author Vitor Costa
  */
-public class ConnectTests extends JavaDdeTest {
+public class ConnectTests extends JavaDdeTests {
 
 	@Test
 	public void serverReceivesCorrectParameters() {
 		startTest(1);
 		
-		DdeServer server = newServer("TestService");
+		DdeServer server = newServer(service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
-				assertEquals("TestService", e.getService());
-				assertEquals("TestTopic", e.getTopic());
+				assertEquals(service, e.getService());
+				assertEquals(topic, e.getTopic());
 				assertFalse(e.isSameInstance());
 				return true;
 			}
 			
 			public void onConnectConfirm(ConnectConfirmEvent e) {
 				assertNotNull(e.getConversation());
-				assertEquals("TestService", e.getConversation().getService());
-				assertEquals("TestTopic", e.getConversation().getTopic());
+				assertEquals(service, e.getConversation().getService());
+				assertEquals(topic, e.getConversation().getTopic());
 				countDown();
 			}
 		});
 		
 		DdeClient client = newClient();
-		client.connect("TestService", "TestTopic");
+		client.connect(service, topic);
 
 		finishTest();
 	}
 	
 	@Test
 	public void serverDoesNotListenOnUnregisteredService() {
-		DdeServer server = newServer("TestService");
+		DdeServer server = newServer(service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
 				fail();
@@ -84,7 +84,7 @@ public class ConnectTests extends JavaDdeTest {
 	@Test
 	public void serverDoesNotListenWhenUsingFailConnections() {
 		DdeServer server = newServer(
-				InitializeFlags.CBF_FAIL_CONNECTIONS, "TestService");
+				InitializeFlags.CBF_FAIL_CONNECTIONS, service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
 				fail();
@@ -94,7 +94,7 @@ public class ConnectTests extends JavaDdeTest {
 		
 		DdeClient client = newClient();
 		try {
-			client.connect("TestService", "TestTopic");
+			client.connect(service, topic);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());
@@ -113,38 +113,38 @@ public class ConnectTests extends JavaDdeTest {
 
 		DdeClient client = newClient();
 		try {
-			client.connect("TestService", "TestTopic");
+			client.connect(service, topic);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());
 		}
 		
-		server.registerService("TestService");
+		server.registerService(service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
-				return "TestTopic".equals(e.getTopic());
+				return topic.equals(e.getTopic());
 			}
 		});
 		
-		client.connect("TestService", "TestTopic");
+		client.connect(service, topic);
 	}
 	
 	@Test
 	public void serverCanUnregisterService() {
-		DdeServer server = newServer("TestService");
+		DdeServer server = newServer(service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
-				return "TestTopic".equals(e.getTopic());
+				return topic.equals(e.getTopic());
 			}
 		});
 		
 		DdeClient client = newClient();
-		Conversation conv = client.connect("TestService", "TestTopic");
+		Conversation conv = client.connect(service, topic);
 		boolean disconnected = conv.disconnect();
 		
 		assertTrue(disconnected);
 		
-		server.unregisterService("TestService");
+		server.unregisterService(service);
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
 				fail();
@@ -153,7 +153,39 @@ public class ConnectTests extends JavaDdeTest {
 		});
 		
 		try {
-			client.connect("TestService", "TestTopic");
+			client.connect(service, topic);
+			fail();
+		} catch (DdeException e) {
+			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());
+		}
+	}
+	
+	@Test
+	public void serverCanUnregisterOnlyOneService() throws Exception {
+		DdeServer server = newServer("TestService1", "TestService2");
+		server.setConnectionListener(new ConnectionAdapter() {
+			public boolean onConnect(ConnectEvent e) {
+				return topic.equals(e.getTopic());
+			}
+		});
+		
+		DdeClient client = newClient();
+		client.connect("TestService1", topic).disconnect();
+		client.connect("TestService2", topic).disconnect();
+		
+		server.unregisterService("TestService2");
+		server.setConnectionListener(new ConnectionAdapter() {
+			public boolean onConnect(ConnectEvent e) {
+				assertEquals("TestService1", e.getService());
+				return true;
+			}
+		});
+		
+		client.connect("TestService1", topic);
+		// succeeds
+		
+		try {
+			client.connect("TestService2", topic);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());
@@ -165,13 +197,13 @@ public class ConnectTests extends JavaDdeTest {
 		DdeServer server = newServer("TestService1", "TestService2");
 		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
-				return "TestTopic".equals(e.getTopic());
+				return topic.equals(e.getTopic());
 			}
 		});
 		
 		DdeClient client = newClient();
-		client.connect("TestService1", "TestTopic").disconnect();
-		client.connect("TestService2", "TestTopic").disconnect();
+		client.connect("TestService1", topic).disconnect();
+		client.connect("TestService2", topic).disconnect();
 		
 		server.unregisterAllServices();
 		server.setConnectionListener(new ConnectionAdapter() {
@@ -182,14 +214,14 @@ public class ConnectTests extends JavaDdeTest {
 		});
 		
 		try {
-			client.connect("TestService1", "TestTopic");
+			client.connect("TestService1", topic);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());
 		}
 		
 		try {
-			client.connect("TestService2", "TestTopic");
+			client.connect("TestService2", topic);
 			fail();
 		} catch (DdeException e) {
 			assertEquals(DmlError.NO_CONV_ESTABLISHED, e.getError());

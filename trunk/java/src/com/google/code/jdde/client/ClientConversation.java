@@ -24,8 +24,10 @@ import java.util.logging.Logger;
 
 import com.google.code.jdde.client.event.AdviseDataListener;
 import com.google.code.jdde.client.event.AsyncTransactionCompletedListener;
+import com.google.code.jdde.client.event.ClientDisconnectListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
+import com.google.code.jdde.event.DisconnectEvent.ClientDisconnectEvent;
 import com.google.code.jdde.misc.ClientTransaction;
 import com.google.code.jdde.misc.ClipboardFormat;
 import com.google.code.jdde.misc.Conversation;
@@ -42,6 +44,8 @@ public class ClientConversation extends Conversation {
 	
 	private DdeClient client;
 	
+	private ClientDisconnectListener disconnectListener;
+	
 	private List<Advise> advises;
 	private Map<Integer, AsyncTransaction> transactions;
 	
@@ -52,6 +56,14 @@ public class ClientConversation extends Conversation {
 		
 		advises = new ArrayList<Advise>();
 		transactions = new HashMap<Integer, AsyncTransaction>();
+	}
+	
+	public void setDisconnectListener(ClientDisconnectListener disconnectListener) {
+		this.disconnectListener = disconnectListener;
+	}
+	
+	public ClientDisconnectListener getDisconnectListener() {
+		return disconnectListener;
 	}
 	
 	/* ************************************ *
@@ -151,14 +163,21 @@ public class ClientConversation extends Conversation {
 		}
 	}
 	
+	void fireOnDisconnect(CallbackParameters parameters) {
+		if (disconnectListener != null) {
+			ClientDisconnectEvent event = new ClientDisconnectEvent(client, this, parameters);
+			disconnectListener.onDisconnect(event);
+		}
+	}
+	
 	void fireAsyncTransactionCompleted(CallbackParameters parameters) {
 		Object txId = parameters.getDwData1();
 
 		if (txId == null) {
-			logger.warning("CallbackParameters.dwData1 is null");
+			logger.severe("CallbackParameters.dwData1 is null");
 		}
 		else if (txId.getClass() != Integer.class) {
-			logger.warning("CallbackParameters.dwData1 is not of type Integer");
+			logger.severe("CallbackParameters.dwData1 is not of type Integer");
 		}
 		else {
 			AsyncTransaction asyncTx = transactions.get(txId);
@@ -168,7 +187,7 @@ public class ClientConversation extends Conversation {
 				transactions.remove(txId);
 			}
 			else {
-				logger.warning("Could not find transaction with the given id: " + txId);
+				logger.severe("Could not find transaction with the given id: " + txId);
 			}
 		}
 	}

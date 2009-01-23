@@ -24,7 +24,9 @@ import com.google.code.jdde.event.AdviseStopEvent;
 import com.google.code.jdde.event.ExecuteEvent;
 import com.google.code.jdde.event.PokeEvent;
 import com.google.code.jdde.event.RequestEvent;
+import com.google.code.jdde.event.DisconnectEvent.ServerDisconnectEvent;
 import com.google.code.jdde.misc.Conversation;
+import com.google.code.jdde.server.event.ServerDisconnectListener;
 import com.google.code.jdde.server.event.TransactionListener;
 
 /**
@@ -34,6 +36,7 @@ import com.google.code.jdde.server.event.TransactionListener;
 public class ServerConversation extends Conversation {
 
 	private TransactionListener transactionListener;
+	private ServerDisconnectListener disconnectListener;
 	
 	ServerConversation(DdeServer server, int hConv, String service, String topic) {
 		super(server, hConv, service, topic);
@@ -41,6 +44,18 @@ public class ServerConversation extends Conversation {
 	
 	public void setTransactionListener(TransactionListener transactionListener) {
 		this.transactionListener = transactionListener;
+	}
+	
+	public TransactionListener getTransactionListener() {
+		return transactionListener;
+	}
+	
+	public void setDisconnectListener(ServerDisconnectListener disconnectListener) {
+		this.disconnectListener = disconnectListener;
+	}
+	
+	public ServerDisconnectListener getDisconnectListener() {
+		return disconnectListener;
 	}
 	
 	@Override
@@ -76,9 +91,9 @@ public class ServerConversation extends Conversation {
 	}
 	
 	void fireOnDisconnect(CallbackParameters parameters) {
-		if (transactionListener != null) {
-//			ServerDisconnectEvent event = new ServerDisconnectEvent(getApplication(), this, parameters);
-			//TODO missing call to listener
+		if (disconnectListener != null) {
+			ServerDisconnectEvent event = new ServerDisconnectEvent(getApplication(), this, parameters);
+			disconnectListener.onDisconnect(event);
 		}
 	}
 	
