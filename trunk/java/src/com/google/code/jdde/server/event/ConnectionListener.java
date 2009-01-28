@@ -18,6 +18,8 @@ package com.google.code.jdde.server.event;
 
 import com.google.code.jdde.event.ConnectConfirmEvent;
 import com.google.code.jdde.event.ConnectEvent;
+import com.google.code.jdde.event.WildConnectEvent;
+import com.google.code.jdde.misc.SupportedServiceTopic;
 
 /**
  * 
@@ -27,12 +29,8 @@ public interface ConnectionListener {
 
 	boolean onConnect(ConnectEvent e);
 	
-	void onConnectConfirm(ConnectConfirmEvent e);
+	SupportedServiceTopic[] onWildConnect(WildConnectEvent e);
 	
-//	void onDisconnect(ConnectionEvent e);
-//	
-//	void onRegister(ConnectionEvent e);
-//	
-//	void onUnregister(ConnectionEvent e);
+	void onConnectConfirm(ConnectConfirmEvent e);
 	
 }

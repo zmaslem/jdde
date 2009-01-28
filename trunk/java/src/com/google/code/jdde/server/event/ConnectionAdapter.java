@@ -18,6 +18,8 @@ package com.google.code.jdde.server.event;
 
 import com.google.code.jdde.event.ConnectConfirmEvent;
 import com.google.code.jdde.event.ConnectEvent;
+import com.google.code.jdde.event.WildConnectEvent;
+import com.google.code.jdde.misc.SupportedServiceTopic;
 
 /**
  * 
@@ -28,6 +30,11 @@ public class ConnectionAdapter implements ConnectionListener {
 	@Override
 	public boolean onConnect(ConnectEvent e) {
 		return false;
+	}
+	
+	@Override
+	public SupportedServiceTopic[] onWildConnect(WildConnectEvent e) {
+		return null;
 	}
 
 	@Override

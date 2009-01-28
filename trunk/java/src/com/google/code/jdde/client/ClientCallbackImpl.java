@@ -26,6 +26,7 @@ import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.event.RegisterEvent.ClientRegisterEvent;
 import com.google.code.jdde.event.UnregisterEvent.ClientUnregisterEvent;
 import com.google.code.jdde.misc.JavaDdeUtil;
+import com.google.code.jdde.misc.SupportedServiceTopic;
 
 /**
  * 
@@ -89,7 +90,7 @@ class ClientCallbackImpl implements DdeCallback {
 			}
 			break;
 		case TransactionFlags.XTYP_ERROR:
-			
+			//TODO needs to be implemented
 			break;
 		case TransactionFlags.XTYP_REGISTER:
 			if (registrationListener != null) {
@@ -115,4 +116,11 @@ class ClientCallbackImpl implements DdeCallback {
 			break;
 		}
 	}
+	
+	@Override
+	public SupportedServiceTopic[] DdeWildConnectCallback(CallbackParameters parameters) {
+		logger.warning("DdeClient should never receive a wild connect callback");
+		return null;
+	}
+	
 }

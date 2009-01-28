@@ -14,27 +14,40 @@
  * the License.
  */
 
-package com.google.code.jdde.ddeml;
-
-import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
-import com.google.code.jdde.misc.SupportedServiceTopic;
+package com.google.code.jdde.misc;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface DdeCallback {
+public class SupportedServiceTopic {
 
-	boolean DdeBooleanCallback(CallbackParameters parameters);
+	private String service;
+	private String topic;
 	
-	byte[] DdeDataCallback(CallbackParameters parameters);
+	public SupportedServiceTopic() {
 	
-	FlagCallbackResult DdeFlagCallback(CallbackParameters parameters);
+	}
 	
-	void DdeNotificationCallback(CallbackParameters parameters);
-	
-	/* specific callbacks **/
-	
-	SupportedServiceTopic[] DdeWildConnectCallback(CallbackParameters parameters);
+	public SupportedServiceTopic(String service, String topic) {
+		setService(service);
+		setTopic(topic);
+	}
+
+	public String getService() {
+		return service;
+	}
+
+	public void setService(String service) {
+		this.service = service;
+	}
+
+	public String getTopic() {
+		return topic;
+	}
+
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
 	
 }

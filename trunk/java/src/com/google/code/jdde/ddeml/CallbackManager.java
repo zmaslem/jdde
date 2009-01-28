@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.misc.JavaDdeUtil;
+import com.google.code.jdde.misc.SupportedServiceTopic;
 
 /**
  * 
@@ -103,6 +104,29 @@ class CallbackManager {
 		else {	// Should never happen..
 			logger.warning("A callback was not found with the given thread id: " + parameters.getIdThread());
 		}
+	}
+	
+	public static String[] DdeWildConnectCallback(CallbackParameters parameters) {
+		logger.finer(parameters.toString());
+		DdeCallback callback = callbacks.get(parameters.getIdThread());
+		if (callback != null) {
+			SupportedServiceTopic[] result = callback.DdeWildConnectCallback(parameters);
+			
+			if (result != null) {
+				String[] strings = new String[result.length * 2];
+				
+				for (int i = 0, j = 0; i < result.length; i++) {
+					strings[j++] = result[i].getService();
+					strings[j++] = result[i].getTopic();
+				}
+				return strings;
+			}
+		}
+		else {	// Should never happen..
+			logger.warning("A callback was not found with the given thread id: " + parameters.getIdThread());
+		}
+		
+		return null;
 	}
 	
 }

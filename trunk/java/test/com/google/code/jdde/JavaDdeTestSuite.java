@@ -27,6 +27,7 @@ import com.google.code.jdde.transaction.ExecuteTests;
 import com.google.code.jdde.transaction.PokeTests;
 import com.google.code.jdde.transaction.RegisterTests;
 import com.google.code.jdde.transaction.RequestTests;
+import com.google.code.jdde.transaction.WildConnectTests;
 
 /**
  * 
@@ -40,7 +41,8 @@ import com.google.code.jdde.transaction.RequestTests;
 	ExecuteTests.class,
 	PokeTests.class,
 	RegisterTests.class,
-	RequestTests.class
+	RequestTests.class,
+	WildConnectTests.class
 })
 public class JavaDdeTestSuite {
 
