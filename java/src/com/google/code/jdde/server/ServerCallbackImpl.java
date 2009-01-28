@@ -24,9 +24,11 @@ import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.event.ConnectConfirmEvent;
 import com.google.code.jdde.event.ConnectEvent;
+import com.google.code.jdde.event.WildConnectEvent;
 import com.google.code.jdde.event.RegisterEvent.ServerRegisterEvent;
 import com.google.code.jdde.event.UnregisterEvent.ServerUnregisterEvent;
 import com.google.code.jdde.misc.JavaDdeUtil;
+import com.google.code.jdde.misc.SupportedServiceTopic;
 import com.google.code.jdde.server.event.ConnectionListener;
 import com.google.code.jdde.server.event.ServerRegistrationListener;
 import com.google.code.jdde.server.event.TransactionListener;
@@ -93,9 +95,6 @@ class ServerCallbackImpl implements DdeCallback {
 			if (conversation != null) {
 				return conversation.fireOnRequest(parameters);
 			}
-			break;
-		case TransactionFlags.XTYP_WILDCONNECT:
-			//TODO needs to be implemented
 			break;
 		default:
 			String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
@@ -182,6 +181,26 @@ class ServerCallbackImpl implements DdeCallback {
 			logger.warning("DdeServer should never receive a notification callback of type " + tx);
 			break;
 		}
+	}
+	
+	@Override
+	public SupportedServiceTopic[] DdeWildConnectCallback(CallbackParameters parameters) {
+		switch (parameters.getUType()) {
+		case TransactionFlags.XTYP_WILDCONNECT:
+			WildConnectEvent event = new WildConnectEvent(server, parameters);
+			
+			ConnectionListener connectionListener = server.getConnectionListener();
+			if (connectionListener != null) {
+				return connectionListener.onWildConnect(event);
+			}
+			break;
+		default:
+			String tx = JavaDdeUtil.translateTransaction(parameters.getUType());
+			logger.warning("DdeServer should never receive a wild connect callback of type " + tx);
+			break;	
+		}
+		
+		return null;
 	}
 
 }

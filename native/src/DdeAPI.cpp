@@ -153,6 +153,7 @@ jmethodID mBooleanCallback;
 jmethodID mDataCallback;
 jmethodID mFlagCallback;
 jmethodID mNotificationCallback;
+jmethodID mWildConnectCallback;
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
@@ -189,10 +190,12 @@ HDDEDATA CALLBACK DdeCallback(
 		mDataCallback = env->GetStaticMethodID(clazz, "DdeDataCallback", "(Lcom/google/code/jdde/ddeml/CallbackParameters;)[B");
 		mFlagCallback = env->GetStaticMethodID(clazz, "DdeFlagCallback", "(Lcom/google/code/jdde/ddeml/CallbackParameters;)I");
 		mNotificationCallback = env->GetStaticMethodID(clazz, "DdeNotificationCallback", "(Lcom/google/code/jdde/ddeml/CallbackParameters;)V");
+		mWildConnectCallback = env->GetStaticMethodID(clazz, "DdeWildConnectCallback", "(Lcom/google/code/jdde/ddeml/CallbackParameters;)[Ljava/lang/String;");
 	}
 
 	UINT idInst = env->CallStaticIntMethod(CallbackManager, mGetIdInst, idThread);
 
+	jobject jobj;
 	jobject parameter = WrapCallbackParameters(env, idInst, idThread, uType,
 			uFmt, hconv, hsz1, hsz2, hdata, dwData1, dwData2);
 
@@ -203,8 +206,7 @@ HDDEDATA CALLBACK DdeCallback(
 		break;
 	case XTYP_ADVREQ:
 	case XTYP_REQUEST:
-	case XTYP_WILDCONNECT:
-		jobject jobj = env->CallStaticObjectMethod(CallbackManager, mDataCallback, parameter);
+		jobj = env->CallStaticObjectMethod(CallbackManager, mDataCallback, parameter);
 		jbyteArray bArray = (jbyteArray) jobj;
 
 		if (bArray != NULL) {
@@ -212,6 +214,32 @@ HDDEDATA CALLBACK DdeCallback(
 			jbyte *pSrc = env->GetByteArrayElements(bArray, 0);
 			result = DdeCreateDataHandle(idInst, (LPBYTE) pSrc, cb, 0, hsz2, uFmt, 0);
 			env->ReleaseByteArrayElements(bArray, pSrc, 0);
+		}
+		break;
+	case XTYP_WILDCONNECT:
+		jobj = env->CallStaticObjectMethod(CallbackManager, mWildConnectCallback, parameter);
+		jobjectArray sArray = (jobjectArray) jobj;
+
+		if (sArray != NULL) {
+			jsize cb = env->GetArrayLength(sArray);
+			jsize length = cb / 2;
+			HSZPAIR* hszPair = (HSZPAIR*) malloc((length + 1) * sizeof(HSZPAIR));
+
+			int j = 0;
+			for (int i = 0; i < cb; ) {
+				jstring str1 = (jstring) env->GetObjectArrayElement(sArray, i++);
+				HSZ hsz1 = UtilCreateStringHandle(env, idInst, str1);
+
+				jstring str2 = (jstring) env->GetObjectArrayElement(sArray, i++);
+				HSZ hsz2 = UtilCreateStringHandle(env, idInst, str2);
+
+				hszPair[j].hszSvc = hsz1;
+				hszPair[j++].hszTopic = hsz2;
+			}
+			hszPair[j].hszSvc = NULL;
+			hszPair[j++].hszTopic = NULL;
+
+			result = DdeCreateDataHandle(idInst, (LPBYTE)&hszPair[0], sizeof(HSZPAIR) * j, 0L, 0, uFmt, 0);
 		}
 		break;
 	case XTYP_ADVDATA:

@@ -135,10 +135,12 @@ jobject WrapCallbackParameters(
 
 	switch (uType) {
 	case XTYP_ADVREQ:
+	case XTYP_ERROR:
 		jdwData1 = NewInteger(env, LOWORD(dwData1));
 		// dwData2 is not used
 		break;
 	case XTYP_CONNECT:
+	case XTYP_WILDCONNECT:
 		//jdwData1 = CONVCONTEXT
 		jdwData2 = NewBoolean(env, dwData2);
 		break;
@@ -146,6 +148,10 @@ jobject WrapCallbackParameters(
 	case XTYP_DISCONNECT:
 		// dwData1 is not used
 		jdwData2 = NewBoolean(env, dwData2);
+		break;
+	case XTYP_MONITOR:
+		// dwData1 is not used
+		jdwData2 = NewInteger(env, dwData2);
 		break;
 	case XTYP_XACT_COMPLETE:
 		jdwData1 = NewInteger(env, dwData1);

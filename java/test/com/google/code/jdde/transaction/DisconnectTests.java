@@ -29,7 +29,7 @@ import com.google.code.jdde.event.DisconnectEvent.ClientDisconnectEvent;
 import com.google.code.jdde.event.DisconnectEvent.ServerDisconnectEvent;
 import com.google.code.jdde.server.DdeServer;
 import com.google.code.jdde.server.ServerConversation;
-import com.google.code.jdde.server.event.ConnectionListener;
+import com.google.code.jdde.server.event.ConnectionAdapter;
 import com.google.code.jdde.server.event.ServerDisconnectListener;
 
 /**
@@ -37,44 +37,13 @@ import com.google.code.jdde.server.event.ServerDisconnectListener;
  * @author Vitor Costa
  */
 public class DisconnectTests extends JavaDdeTests {
-
-	@Test
-	public void clientReceivesDisconnectEvent() throws Exception {
-		startTest(1);
-		
-		final Pointer<ServerConversation> serverConv = new Pointer<ServerConversation>();
-		
-		DdeServer server = newServer(service);
-		server.setConnectionListener(new ConnectionListener() {
-			public boolean onConnect(ConnectEvent e) {
-				return true;
-			}
-			public void onConnectConfirm(ConnectConfirmEvent e) {
-				serverConv.value = e.getConversation();
-			}
-		});
-		
-		DdeClient client = newClient();
-		ClientConversation conv = client.connect(service, topic);
-		conv.setDisconnectListener(new ClientDisconnectListener() {
-			public void onDisconnect(ClientDisconnectEvent e) {
-				countDown();
-			}
-		});
-		
-		// wait to server receive connect confirm
-		Thread.sleep(10);
-		
-		boolean disconnected = serverConv.value.disconnect();
-		assertTrue(disconnected);
-	}
 	
 	@Test
 	public void serverReceivesDiconnectEvent() throws Exception {
 		startTest(1);
 		
 		DdeServer server = newServer(service);
-		server.setConnectionListener(new ConnectionListener() {
+		server.setConnectionListener(new ConnectionAdapter() {
 			public boolean onConnect(ConnectEvent e) {
 				return true;
 			}
@@ -95,6 +64,37 @@ public class DisconnectTests extends JavaDdeTests {
 		Thread.sleep(10);
 		
 		boolean disconnected = conv.disconnect();
+		assertTrue(disconnected);
+	}
+
+	@Test
+	public void clientReceivesDisconnectEvent() throws Exception {
+		startTest(1);
+		
+		final Pointer<ServerConversation> serverConv = new Pointer<ServerConversation>();
+		
+		DdeServer server = newServer(service);
+		server.setConnectionListener(new ConnectionAdapter() {
+			public boolean onConnect(ConnectEvent e) {
+				return true;
+			}
+			public void onConnectConfirm(ConnectConfirmEvent e) {
+				serverConv.value = e.getConversation();
+			}
+		});
+		
+		DdeClient client = newClient();
+		ClientConversation conv = client.connect(service, topic);
+		conv.setDisconnectListener(new ClientDisconnectListener() {
+			public void onDisconnect(ClientDisconnectEvent e) {
+				countDown();
+			}
+		});
+		
+		// wait to server receive connect confirm
+		Thread.sleep(10);
+		
+		boolean disconnected = serverConv.value.disconnect();
 		assertTrue(disconnected);
 	}
 	

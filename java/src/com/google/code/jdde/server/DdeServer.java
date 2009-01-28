@@ -91,6 +91,14 @@ public class DdeServer extends DdeApplication {
 		invokeNameService(null, NameServiceFlags.DNS_UNREGISTER);
 	}
 	
+	public void turnServiceNameFilteringOn() {
+		invokeNameService(null, NameServiceFlags.DNS_FILTERON);
+	}
+	
+	public void turnServiceNameFilteringOff() {
+		invokeNameService(null, NameServiceFlags.DNS_FILTEROFF);
+	}
+	
 	private void invokeNameService(final String service, final int commands) {
 		final Pointer<Integer> error = new Pointer<Integer>();
 		
