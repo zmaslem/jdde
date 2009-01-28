@@ -16,6 +16,7 @@
 
 package com.google.code.jdde.misc;
 
+import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.ddeml.DdeAPI;
 import com.google.code.jdde.ddeml.Pointer;
 import com.google.code.jdde.ddeml.constants.DmlError;
@@ -34,7 +35,7 @@ public class ClientTransaction {
 	private int result;
 	private byte[] data;
 	
-	public ClientTransaction(Conversation conversation) {
+	public ClientTransaction(ClientConversation conversation) {
 		this.idInst = conversation.getApplication().getIdInst();
 		this.hConv = conversation.getHConv();
 		this.loop = conversation.getApplication().getLoop();

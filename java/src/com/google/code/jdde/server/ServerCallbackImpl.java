@@ -25,11 +25,13 @@ import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.event.ConnectConfirmEvent;
 import com.google.code.jdde.event.ConnectEvent;
 import com.google.code.jdde.event.WildConnectEvent;
+import com.google.code.jdde.event.ErrorEvent.ServerErrorEvent;
 import com.google.code.jdde.event.RegisterEvent.ServerRegisterEvent;
 import com.google.code.jdde.event.UnregisterEvent.ServerUnregisterEvent;
 import com.google.code.jdde.misc.JavaDdeUtil;
 import com.google.code.jdde.misc.SupportedServiceTopic;
 import com.google.code.jdde.server.event.ConnectionListener;
+import com.google.code.jdde.server.event.ServerErrorListener;
 import com.google.code.jdde.server.event.ServerRegistrationListener;
 import com.google.code.jdde.server.event.TransactionListener;
 
@@ -129,6 +131,7 @@ class ServerCallbackImpl implements DdeCallback {
 		
 		ConnectionListener connectionListener = server.getConnectionListener();
 		TransactionListener transactionListener = server.getTransactionListener();
+		ServerErrorListener errorListener = server.getErrorListener();
 		ServerRegistrationListener registrationListener = server.getRegistrationListener();
 		
 		switch (parameters.getUType()) {
@@ -162,7 +165,13 @@ class ServerCallbackImpl implements DdeCallback {
 			}
 			break;
 		case TransactionFlags.XTYP_ERROR:
-			//TODO needs to be implemented
+			if (parameters.getHconv() != 0) {
+				conversation = findConversation(parameters);
+			}
+			if (errorListener != null) {
+				ServerErrorEvent event = new ServerErrorEvent(server, conversation, parameters);
+				errorListener.onError(event);
+			}
 			break;
 		case TransactionFlags.XTYP_REGISTER:
 			if (registrationListener != null) {

@@ -43,7 +43,7 @@ public abstract class Conversation {
 		this.topic = topic;
 	}
 
-	public DdeApplication getApplication() {
+	protected DdeApplication getApplication() {
 		return application;
 	}
 	
@@ -96,7 +96,5 @@ public abstract class Conversation {
 			return false;
 		return true;
 	}
-	
-
 	
 }

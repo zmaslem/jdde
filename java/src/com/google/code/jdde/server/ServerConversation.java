@@ -42,6 +42,10 @@ public class ServerConversation extends Conversation {
 		super(server, hConv, service, topic);
 	}
 	
+	/* ************************************ *
+	 ********* getters and setters ********** 
+	 * ************************************ */
+	
 	public void setTransactionListener(TransactionListener transactionListener) {
 		this.transactionListener = transactionListener;
 	}
@@ -58,8 +62,7 @@ public class ServerConversation extends Conversation {
 		return disconnectListener;
 	}
 	
-	@Override
-	public DdeServer getApplication() {
+	public DdeServer getServer() {
 		return (DdeServer) super.getApplication();
 	}
 	
@@ -69,7 +72,7 @@ public class ServerConversation extends Conversation {
 	
 	byte[] fireOnAdviseRequest(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			AdviseRequestEvent event = new AdviseRequestEvent(getApplication(), this, parameters);
+			AdviseRequestEvent event = new AdviseRequestEvent(getServer(), this, parameters);
 			return transactionListener.onAdviseRequest(event);
 		}
 		return null;
@@ -77,7 +80,7 @@ public class ServerConversation extends Conversation {
 	
 	boolean fireOnAdviseStart(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			AdviseStartEvent event = new AdviseStartEvent(getApplication(), this, parameters);
+			AdviseStartEvent event = new AdviseStartEvent(getServer(), this, parameters);
 			return transactionListener.onAdviseStart(event);
 		}
 		return false;
@@ -85,21 +88,21 @@ public class ServerConversation extends Conversation {
 
 	void fireOnAdviseStop(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			AdviseStopEvent event = new AdviseStopEvent(getApplication(), this, parameters);
+			AdviseStopEvent event = new AdviseStopEvent(getServer(), this, parameters);
 			transactionListener.onAdviseStop(event);
 		}
 	}
 	
 	void fireOnDisconnect(CallbackParameters parameters) {
 		if (disconnectListener != null) {
-			ServerDisconnectEvent event = new ServerDisconnectEvent(getApplication(), this, parameters);
+			ServerDisconnectEvent event = new ServerDisconnectEvent(getServer(), this, parameters);
 			disconnectListener.onDisconnect(event);
 		}
 	}
 	
 	FlagCallbackResult fireOnExecute(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			ExecuteEvent event = new ExecuteEvent(getApplication(), this, parameters);
+			ExecuteEvent event = new ExecuteEvent(getServer(), this, parameters);
 			return transactionListener.onExecute(event);
 		}
 		return FlagCallbackResult.DDE_FNOTPROCESSED;
@@ -107,7 +110,7 @@ public class ServerConversation extends Conversation {
 	
 	FlagCallbackResult fireOnPoke(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			PokeEvent event = new PokeEvent(getApplication(), this, parameters);
+			PokeEvent event = new PokeEvent(getServer(), this, parameters);
 			return transactionListener.onPoke(event);
 		}
 		return FlagCallbackResult.DDE_FNOTPROCESSED;
@@ -115,7 +118,7 @@ public class ServerConversation extends Conversation {
 	
 	byte[] fireOnRequest(CallbackParameters parameters) {
 		if (transactionListener != null) {
-			RequestEvent event = new RequestEvent(getApplication(), this, parameters);
+			RequestEvent event = new RequestEvent(getServer(), this, parameters);
 			return transactionListener.onRequest(event);
 		}
 		return null;
