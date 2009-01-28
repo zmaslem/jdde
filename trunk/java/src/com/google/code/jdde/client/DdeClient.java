@@ -16,6 +16,7 @@
 
 package com.google.code.jdde.client;
 
+import com.google.code.jdde.client.event.ClientErrorListener;
 import com.google.code.jdde.client.event.ClientRegistrationListener;
 import com.google.code.jdde.ddeml.DdeAPI;
 import com.google.code.jdde.ddeml.Pointer;
@@ -33,6 +34,7 @@ public class DdeClient extends DdeApplication {
 	private int defaultTimeout;
 	private ClipboardFormat defaultFormat;
 	
+	private ClientErrorListener errorListener;
 	private ClientRegistrationListener registrationListener;
 	
 	public DdeClient() {
@@ -60,12 +62,20 @@ public class DdeClient extends DdeApplication {
 		this.defaultFormat = defaultFormat;
 	}
 	
-	public void setRegistrationListener(ClientRegistrationListener registrationListener) {
-		this.registrationListener = registrationListener;
+	public ClientErrorListener getErrorListener() {
+		return errorListener;
+	}
+
+	public void setErrorListener(ClientErrorListener errorListener) {
+		this.errorListener = errorListener;
 	}
 	
 	public ClientRegistrationListener getRegistrationListener() {
 		return registrationListener;
+	}
+
+	public void setRegistrationListener(ClientRegistrationListener registrationListener) {
+		this.registrationListener = registrationListener;
 	}
 
 	public ClientConversation connect(final String service, final String topic) {

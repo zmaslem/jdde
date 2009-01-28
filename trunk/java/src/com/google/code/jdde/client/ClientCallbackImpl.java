@@ -18,11 +18,13 @@ package com.google.code.jdde.client;
 
 import java.util.logging.Logger;
 
+import com.google.code.jdde.client.event.ClientErrorListener;
 import com.google.code.jdde.client.event.ClientRegistrationListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.DdeCallback;
 import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
+import com.google.code.jdde.event.ErrorEvent.ClientErrorEvent;
 import com.google.code.jdde.event.RegisterEvent.ClientRegisterEvent;
 import com.google.code.jdde.event.UnregisterEvent.ClientUnregisterEvent;
 import com.google.code.jdde.misc.JavaDdeUtil;
@@ -80,6 +82,7 @@ class ClientCallbackImpl implements DdeCallback {
 	public void DdeNotificationCallback(CallbackParameters parameters) {
 		ClientConversation conversation = null;
 		
+		ClientErrorListener errorListener = client.getErrorListener();
 		ClientRegistrationListener registrationListener = client.getRegistrationListener();
 		
 		switch (parameters.getUType()) {
@@ -90,7 +93,13 @@ class ClientCallbackImpl implements DdeCallback {
 			}
 			break;
 		case TransactionFlags.XTYP_ERROR:
-			//TODO needs to be implemented
+			if (parameters.getHconv() != 0) {
+				conversation = findConversation(parameters);
+			}
+			if (errorListener != null) {
+				ClientErrorEvent event = new ClientErrorEvent(client, conversation, parameters);
+				errorListener.onError(event);
+			}
 			break;
 		case TransactionFlags.XTYP_REGISTER:
 			if (registrationListener != null) {

@@ -23,6 +23,7 @@ import com.google.code.jdde.ddeml.constants.InitializeFlags;
 import com.google.code.jdde.ddeml.constants.NameServiceFlags;
 import com.google.code.jdde.misc.DdeApplication;
 import com.google.code.jdde.server.event.ConnectionListener;
+import com.google.code.jdde.server.event.ServerErrorListener;
 import com.google.code.jdde.server.event.ServerRegistrationListener;
 import com.google.code.jdde.server.event.TransactionListener;
 
@@ -34,6 +35,7 @@ public class DdeServer extends DdeApplication {
 
 	private ConnectionListener connectionListener;
 	private TransactionListener transactionListener;
+	private ServerErrorListener errorListener;
 	private ServerRegistrationListener registrationListener;
 	
 	public DdeServer() {
@@ -65,6 +67,14 @@ public class DdeServer extends DdeApplication {
 	
 	public TransactionListener getTransactionListener() {
 		return transactionListener;
+	}
+	
+	public void setErrorListener(ServerErrorListener errorListener) {
+		this.errorListener = errorListener;
+	}
+	
+	public ServerErrorListener getErrorListener() {
+		return errorListener;
 	}
 	
 	public void setRegistrationListener(ServerRegistrationListener registrationListener) {

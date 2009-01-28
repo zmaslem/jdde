@@ -42,8 +42,6 @@ public class ClientConversation extends Conversation {
 
 	private static Logger logger = JavaDdeUtil.getLogger();
 	
-	private DdeClient client;
-	
 	private ClientDisconnectListener disconnectListener;
 	
 	private List<Advise> advises;
@@ -51,8 +49,6 @@ public class ClientConversation extends Conversation {
 	
 	ClientConversation(DdeClient client, int hConv, String service, String topic) {
 		super(client, hConv, service, topic);
-		
-		this.client = client;
 		
 		advises = new ArrayList<Advise>();
 		transactions = new HashMap<Integer, AsyncTransaction>();
@@ -66,12 +62,24 @@ public class ClientConversation extends Conversation {
 		return disconnectListener;
 	}
 	
+	public DdeClient getClient() {
+		return (DdeClient) super.getApplication();
+	}
+	
+	private final ClipboardFormat getDefaultFormat() {
+		return getClient().getDefaultFormat();
+	}
+	
+	private final int getDefaultTimeout() {
+		return getClient().getDefaultTimeout();
+	}
+	
 	/* ************************************ *
 	 ************* xtyp_request ************* 
 	 * ************************************ */
 	
 	public byte[] request(String item) {
-		return request(item, client.getDefaultFormat(), client.getDefaultTimeout());
+		return request(item, getDefaultFormat(), getDefaultTimeout());
 	}
 	
 	public byte[] request(String item, ClipboardFormat format, int timeout) {
@@ -83,7 +91,7 @@ public class ClientConversation extends Conversation {
 	}
 	
 	public AsyncTransaction requestAsync(String item, AsyncTransactionCompletedListener listener) {
-		return requestAsync(item, client.getDefaultFormat(), listener);
+		return requestAsync(item, getDefaultFormat(), listener);
 	}
 	
 	public AsyncTransaction requestAsync(String item, ClipboardFormat format,
@@ -105,7 +113,7 @@ public class ClientConversation extends Conversation {
 	 * ************************************ */
 	
 	public void execute(String command) {
-		execute(command, client.getDefaultTimeout());
+		execute(command, getDefaultTimeout());
 	}
 	
 	public void execute(String command, int timeout) {
@@ -121,7 +129,7 @@ public class ClientConversation extends Conversation {
 	 * ************************************ */
 	
 	public void poke(String item, byte[] data) {
-		poke(item, data, client.getDefaultFormat(), client.getDefaultTimeout());
+		poke(item, data, getDefaultFormat(), getDefaultTimeout());
 	}
 	
 	public void poke(String item, byte[] data, ClipboardFormat format, int timeout) {
@@ -136,7 +144,7 @@ public class ClientConversation extends Conversation {
 	 * ************************************ */
 	
 	public Advise startAdvise(String item, AdviseDataListener listener) {
-		return startAdvise(item, client.getDefaultFormat(), client.getDefaultTimeout(), listener);
+		return startAdvise(item, getDefaultFormat(), getDefaultTimeout(), listener);
 	}
 	
 	public Advise startAdvise(String item, ClipboardFormat format, int timeout,
@@ -165,7 +173,7 @@ public class ClientConversation extends Conversation {
 	
 	void fireOnDisconnect(CallbackParameters parameters) {
 		if (disconnectListener != null) {
-			ClientDisconnectEvent event = new ClientDisconnectEvent(client, this, parameters);
+			ClientDisconnectEvent event = new ClientDisconnectEvent(getClient(), this, parameters);
 			disconnectListener.onDisconnect(event);
 		}
 	}
@@ -218,7 +226,7 @@ public class ClientConversation extends Conversation {
 
 		@Override
 		public void call(ClientTransaction clientTx) {
-			advise = new Advise(client, ClientConversation.this, item, format, listener);
+			advise = new Advise(getClient(), ClientConversation.this, item, format, listener);
 			advises.add(advise);
 		}
 		
@@ -236,7 +244,7 @@ public class ClientConversation extends Conversation {
 		@Override
 		public void call(ClientTransaction clientTx) {
 			Integer txId = clientTx.getResult();
-			asyncTx = new AsyncTransaction(client, ClientConversation.this, txId, listener);
+			asyncTx = new AsyncTransaction(getClient(), ClientConversation.this, txId, listener);
 
 			transactions.put(txId, asyncTx);
 		}
