@@ -41,6 +41,8 @@ public class JavaDdeTests extends Assert {
 	protected String service	= "TestService";
 	protected String topic		= "TestTopic";
 	protected String item		= "TestItem";
+	protected String command	= "[SOME.COMMAND()]";
+	protected byte[] data		= new byte[] {2, 4, 6, 8};
 	
 	private CountDownLatch latch;
 	
@@ -54,12 +56,18 @@ public class JavaDdeTests extends Assert {
 		servers.clear();
 	}
 	
-	public void startTest(int count) {
+	protected void startTest(int count) {
 		latch = new CountDownLatch(count);
 	}
 
-	public void countDown() {
+	protected void countDown() {
 		latch.countDown();
+	}
+	
+	protected void await() {
+		try {
+			latch.await();
+		} catch (InterruptedException e) { }
 	}
 	
 	@After
@@ -123,6 +131,19 @@ public class JavaDdeTests extends Assert {
 			}
 		});
 		return server;
+	}
+	
+	protected void assertEquals(byte[] expected, byte[] actual) {
+		assertEquals(expected.length, actual.length);
+		for (int i = 0; i < expected.length; i++) {
+			assertEquals(expected[i], actual[i]);
+		}
+	}
+	
+	protected void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) { }
 	}
 	
 }

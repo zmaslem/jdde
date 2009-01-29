@@ -100,6 +100,7 @@ public class RegisterTests extends JavaDdeTests {
 		server.unregisterService(service);
 	}
 	
+	@Test
 	@Ignore
 	public void clientCanConnectUsingSpecificService() throws Exception {
 		startTest(2);

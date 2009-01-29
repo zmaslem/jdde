@@ -16,16 +16,22 @@
 
 package com.google.code.jdde.client.event;
 
-import com.google.code.jdde.event.AsyncTransactionCompletedEvent;
+import com.google.code.jdde.event.AsyncTransactionEvent;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AsyncTransactionCompletedListener {
+public class AsyncTransactionAdapter implements AsyncTransactionListener {
 
-	void onError(AsyncTransactionCompletedEvent event);
+	@Override
+	public void onError(AsyncTransactionEvent e) {
+		
+	}
 	
-	void onSuccess(AsyncTransactionCompletedEvent event);
+	@Override
+	public void onSuccess(AsyncTransactionEvent e) {
+		
+	}
 	
 }

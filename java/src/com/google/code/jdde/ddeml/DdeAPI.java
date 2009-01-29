@@ -27,11 +27,9 @@ public class DdeAPI {
 		NativeLoader.load();
 	}
 	
-	//TODO
 	public static native boolean AbandonTransaction(int idInst, int hConv,
 			int idTransaction);
 
-	//TODO testar chamadas asincronas
 	public static native byte[] ClientTransaction(int idInst, byte[] pData, int hConv,
 			String hszItem, int wFmt, int wType, int dwTimeout, Pointer<Integer> $dwResult);
 

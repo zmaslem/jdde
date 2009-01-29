@@ -21,6 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import com.google.code.jdde.transaction.AdviseTests;
+import com.google.code.jdde.transaction.AsynchronousTests;
 import com.google.code.jdde.transaction.ConnectTests;
 import com.google.code.jdde.transaction.DisconnectTests;
 import com.google.code.jdde.transaction.ExecuteTests;
@@ -36,6 +37,7 @@ import com.google.code.jdde.transaction.WildConnectTests;
 @RunWith(Suite.class)
 @SuiteClasses({
 	AdviseTests.class,
+	AsynchronousTests.class,
 	ConnectTests.class,
 	DisconnectTests.class,
 	ExecuteTests.class,

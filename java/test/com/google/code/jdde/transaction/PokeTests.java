@@ -36,8 +36,6 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  */
 public class PokeTests extends JavaDdeTests {
 
-	private byte[] data		= new byte[] {2, 4, 6, 8};
-	
 	@Test
 	public void serverReceivesCorrectParameters() {
 		DdeServer server = newOpenServer(service);
@@ -49,10 +47,7 @@ public class PokeTests extends JavaDdeTests {
 				assertEquals(item, e.getItem());
 				assertEquals(ClipboardFormat.TEXT, e.getFormat());
 				
-				assertEquals(data.length, e.getData().length);
-				for (int i = 0; i < data.length; i++) {
-					assertEquals(data[i], e.getData()[i]);
-				}
+				assertEquals(data, e.getData());
 				
 				return FlagCallbackResult.DDE_FACK;
 			}

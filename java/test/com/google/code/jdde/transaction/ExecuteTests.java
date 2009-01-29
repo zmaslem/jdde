@@ -35,8 +35,6 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  */
 public class ExecuteTests extends JavaDdeTests {
 
-	private String command = "[SOME.COMMAND()]";
-	
 	@Test
 	public void serverReceivesCorrectParameters() {
 		DdeServer server = newOpenServer(service);

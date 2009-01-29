@@ -21,6 +21,12 @@
 #include "DdeAPI.h"
 #include "Util.h"
 
+JNIEXPORT jboolean JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_AbandonTransaction
+  (JNIEnv *env, jclass cls, jint idInst, jint hConv, jint idTransaction)
+{
+	return DdeAbandonTransaction(idInst, (HCONV) hConv, idTransaction);
+}
+
 JNIEXPORT jbyteArray JNICALL Java_com_google_code_jdde_ddeml_DdeAPI_ClientTransaction
   (JNIEnv *env, jclass cls, jint idInst, jbyteArray jpData, jint hConv, jstring jhszItem,
 		  jint wFmt, jint wType, jint dwTimeout, jobject $dwResult)

@@ -35,8 +35,6 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  */
 public class RequestTests extends JavaDdeTests {
 
-	private byte[] data		= new byte[] {2, 4, 6, 8};
-	
 	@Test
 	public void serverReceivesCorrectParameters() {
 		DdeServer server = newOpenServer(service);
@@ -91,10 +89,7 @@ public class RequestTests extends JavaDdeTests {
 		ClientConversation conv = client.connect(service, topic);
 		byte[] result = conv.request(item);
 		
-		assertEquals(data.length, result.length);
-		for (int i = 0; i < data.length; i++) {
-			assertEquals(data[i], result[i]);
-		}
+		assertEquals(data, result);
 	}
 	
 	@Test
