@@ -46,6 +46,10 @@ public class DdeClient extends DdeApplication {
 				InitializeFlags.APPCMD_CLIENTONLY);
 	}
 	
+	/* ************************************ *
+	 ********* getters and setters ********** 
+	 * ************************************ */
+	
 	public int getDefaultTimeout() {
 		return defaultTimeout;
 	}
@@ -78,6 +82,10 @@ public class DdeClient extends DdeApplication {
 		this.registrationListener = registrationListener;
 	}
 
+	/* ************************************ *
+	 *********** ddeml api calls ************ 
+	 * ************************************ */
+	
 	public ClientConversation connect(final String service, final String topic) {
 		final Pointer<Integer> error = new Pointer<Integer>();
 		final Pointer<Integer> hConv = new Pointer<Integer>();

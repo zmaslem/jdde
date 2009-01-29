@@ -40,8 +40,6 @@ import com.google.code.jdde.server.event.TransactionAdapter;
  */
 public class AdviseTests extends JavaDdeTests {
 
-	private byte[] data = new byte[] {2, 4, 6, 8};
-	
 	@Test
 	public void serverReceivesCorrectParameters() {
 		startTest(4);
@@ -134,12 +132,7 @@ public class AdviseTests extends JavaDdeTests {
 		ClientConversation conv = client.connect(service, topic);
 		conv.startAdvise(item, new AdviseDataListener() {
 			public void valueChanged(AdviseDataEvent event) {
-				byte[] result = event.getData();
-
-				assertEquals(data.length, result.length);
-				for (int i = 0; i < data.length; i++) {
-					assertEquals(data[i], result[i]);
-				}
+				assertEquals(data, event.getData());
 				countDown();
 			}
 		});

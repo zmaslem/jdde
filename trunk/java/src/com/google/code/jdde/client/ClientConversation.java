@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.code.jdde.client.event.AdviseDataListener;
-import com.google.code.jdde.client.event.AsyncTransactionCompletedListener;
+import com.google.code.jdde.client.event.AsyncTransactionListener;
 import com.google.code.jdde.client.event.ClientDisconnectListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
@@ -53,6 +53,10 @@ public class ClientConversation extends Conversation {
 		advises = new ArrayList<Advise>();
 		transactions = new HashMap<Integer, AsyncTransaction>();
 	}
+	
+	/* ************************************ *
+	 ********* getters and setters ********** 
+	 * ************************************ */
 	
 	public void setDisconnectListener(ClientDisconnectListener disconnectListener) {
 		this.disconnectListener = disconnectListener;
@@ -90,12 +94,12 @@ public class ClientConversation extends Conversation {
 		return tx.getData();
 	}
 	
-	public AsyncTransaction requestAsync(String item, AsyncTransactionCompletedListener listener) {
+	public AsyncTransaction requestAsync(String item, AsyncTransactionListener listener) {
 		return requestAsync(item, getDefaultFormat(), listener);
 	}
 	
 	public AsyncTransaction requestAsync(String item, ClipboardFormat format,
-			AsyncTransactionCompletedListener listener) {
+			AsyncTransactionListener listener) {
 		
 		AsyncTransactionTask task = new AsyncTransactionTask(listener);
 		
@@ -124,6 +128,18 @@ public class ClientConversation extends Conversation {
 		tx.throwExceptionOnError();
 	}
 	
+	public AsyncTransaction executeAsync(String command, AsyncTransactionListener listener) {
+		AsyncTransactionTask task = new AsyncTransactionTask(listener);
+		
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(command.getBytes(), null, ClipboardFormat.TEXT.getValue(),
+				TransactionFlags.XTYP_EXECUTE, TransactionFlags.TIMEOUT_ASYNC, task);
+		
+		tx.throwExceptionOnError();
+		
+		return task.asyncTx;
+	}
+	
 	/* ************************************ *
 	 ************** xtyp_poke *************** 
 	 * ************************************ */
@@ -137,6 +153,25 @@ public class ClientConversation extends Conversation {
 		tx.call(data, item, format.getValue(), TransactionFlags.XTYP_POKE, timeout);
 		
 		tx.throwExceptionOnError();
+	}
+	
+	public AsyncTransaction pokeAsync(String item, byte[] data,
+			AsyncTransactionListener listener) {
+		return pokeAsync(item, data, getDefaultFormat(), listener);
+	}
+
+	public AsyncTransaction pokeAsync(String item, byte[] data,
+			ClipboardFormat format, AsyncTransactionListener listener) {
+
+		AsyncTransactionTask task = new AsyncTransactionTask(listener);
+		
+		ClientTransaction tx = new ClientTransaction(this);
+		tx.call(data, item, format.getValue(), TransactionFlags.XTYP_POKE,
+				TransactionFlags.TIMEOUT_ASYNC, task);
+
+		tx.throwExceptionOnError();
+		
+		return task.asyncTx;
 	}
 	
 	/* ************************************ *
@@ -203,6 +238,10 @@ public class ClientConversation extends Conversation {
 	void adviseStoped(Advise advise) {
 		advises.remove(advise);
 	}
+	
+	void transactionCompleted(Integer txId) {
+		transactions.remove(txId);
+	}
 
 	/* ************************************ *
 	 ************ helper classes ************ 
@@ -235,9 +274,9 @@ public class ClientConversation extends Conversation {
 	private class AsyncTransactionTask implements PosTransactionTask {
 		
 		private AsyncTransaction asyncTx;
-		private AsyncTransactionCompletedListener listener;
+		private AsyncTransactionListener listener;
 		
-		public AsyncTransactionTask(AsyncTransactionCompletedListener listener) {
+		public AsyncTransactionTask(AsyncTransactionListener listener) {
 			this.listener = listener;
 		}
 		

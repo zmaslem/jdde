@@ -16,14 +16,16 @@
 
 package com.google.code.jdde.client.event;
 
-import com.google.code.jdde.event.AdviseDataEvent;
+import com.google.code.jdde.event.AsyncTransactionEvent;
 
 /**
  * 
  * @author Vitor Costa
  */
-public interface AdviseDataListener {
+public interface AsyncTransactionListener {
 
-	void valueChanged(AdviseDataEvent e);
+	void onError(AsyncTransactionEvent e);
+	
+	void onSuccess(AsyncTransactionEvent e);
 	
 }

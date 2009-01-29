@@ -16,10 +16,12 @@
 
 package com.google.code.jdde.client;
 
-import com.google.code.jdde.client.event.AsyncTransactionCompletedListener;
+import com.google.code.jdde.client.event.AsyncTransactionListener;
 import com.google.code.jdde.ddeml.CallbackParameters;
-import com.google.code.jdde.event.AsyncTransactionCompletedEvent;
-import com.google.code.jdde.misc.ClipboardFormat;
+import com.google.code.jdde.ddeml.DdeAPI;
+import com.google.code.jdde.ddeml.Pointer;
+import com.google.code.jdde.ddeml.constants.DmlError;
+import com.google.code.jdde.event.AsyncTransactionEvent;
 
 /**
  * 
@@ -31,11 +33,12 @@ public class AsyncTransaction {
 	private ClientConversation conversation;
 	
 	private int transactionId;
+	private boolean completed;
 	
-	private AsyncTransactionCompletedListener listener;
+	private AsyncTransactionListener listener;
 	
 	AsyncTransaction(DdeClient client, ClientConversation conversation, int transactionId,
-			AsyncTransactionCompletedListener listener) {
+			AsyncTransactionListener listener) {
 		this.client = client;
 		this.conversation = conversation;
 		
@@ -44,30 +47,71 @@ public class AsyncTransaction {
 		this.listener = listener;
 	}
 	
+	/* ************************************ *
+	 ********* getters and setters ********** 
+	 * ************************************ */
+	
+	public DdeClient getClient() {
+		return client;
+	}
+	
+	public ClientConversation getConversation() {
+		return conversation;
+	}
+	
 	public int getTransactionId() {
 		return transactionId;
 	}
 	
-	public void abandon() {
-		
+	public boolean isCompleted() {
+		return completed;
 	}
+	
+	/* ************************************ *
+	 *********** ddeml api calls ************ 
+	 * ************************************ */
+	
+	public void abandon() {
+		final Pointer<Integer> error = new Pointer<Integer>();
+		
+		client.getLoop().invokeAndWait(new Runnable() {
+			public void run() {
+				int idInst = client.getIdInst();
+				int hConv = conversation.getHConv();
+				
+				boolean succeded = DdeAPI.AbandonTransaction(idInst, hConv, transactionId);
+
+				if (!succeded) {
+					error.value = DdeAPI.GetLastError(client.getIdInst());
+				}				
+			}
+		});
+		
+		DmlError.throwExceptionIfValidError(error.value);
+		
+		completed = true;
+		conversation.transactionCompleted(transactionId);
+	}
+	
+	/* ************************************ *
+	 ********** dispatch callbacks ********** 
+	 * ************************************ */
 	
 	void fireAsyncTransactionCompleted(CallbackParameters parameters) {
 		if (listener != null) {
-			ClipboardFormat format = new ClipboardFormat(parameters.getUFmt());
-			byte[] data = parameters.getHdata();
-			int statusFlags = ((Integer) parameters.getDwData2()).intValue();
+			AsyncTransactionEvent event = new AsyncTransactionEvent(
+					client, conversation, this, parameters);
 			
-			AsyncTransactionCompletedEvent event = new AsyncTransactionCompletedEvent(
-					client, conversation, this, format, data, statusFlags);
-			
-			if (data == null) {
+			if (parameters.getHdata() == null) {
 				listener.onError(event);
 			}
 			else {
 				listener.onSuccess(event);
 			}
 		}
+		
+		completed = true;
+		conversation.transactionCompleted(transactionId);
 	}
 
 	@Override

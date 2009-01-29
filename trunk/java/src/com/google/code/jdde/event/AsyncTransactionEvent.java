@@ -19,13 +19,14 @@ package com.google.code.jdde.event;
 import com.google.code.jdde.client.AsyncTransaction;
 import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
+import com.google.code.jdde.ddeml.CallbackParameters;
 import com.google.code.jdde.misc.ClipboardFormat;
 
 /**
  * 
  * @author Vitor Costa
  */
-public class AsyncTransactionCompletedEvent extends ConversationEvent<DdeClient, ClientConversation> {
+public class AsyncTransactionEvent extends ConversationEvent<DdeClient, ClientConversation> {
 
 	private final AsyncTransaction transaction;
 	private final ClipboardFormat format;
@@ -33,16 +34,16 @@ public class AsyncTransactionCompletedEvent extends ConversationEvent<DdeClient,
 	private final byte[] data;
 	private final int statusFlags;
 	
-	public AsyncTransactionCompletedEvent(DdeClient client, ClientConversation conversation, 
-			AsyncTransaction transaction, ClipboardFormat format, byte[] data, int statusFlag) {
+	public AsyncTransactionEvent(DdeClient client, ClientConversation conversation, 
+			AsyncTransaction transaction, CallbackParameters parameters) {
 		
 		super(client, conversation);
 		
 		this.transaction = transaction;
-		this.format = format;
+		this.format = new ClipboardFormat(parameters.getUFmt());
 		
-		this.data = data;
-		this.statusFlags = statusFlag;
+		this.data = parameters.getHdata();
+		this.statusFlags = ((Integer) parameters.getDwData2()).intValue();
 	}
 
 	public AsyncTransaction getTransaction() {

@@ -17,7 +17,7 @@
 	<property name="jDDE.src.dir" location="${jDDE.dir}/src" />
 	<property name="jDDE.bin.dir" location="${build.dir}/java" />
 
-	<property name="version.num" value="0.1"/>
+	<property name="version.num" value="0.2"/>
 
 	<target name="clean-before">
 		<delete dir="${build.dir}" />
@@ -64,10 +64,12 @@
 	</target>
 
 	<target name="zip" depends="compile-native, jar">
+		<copy file="${basedir}/LICENSE" todir="${build.dir}" />
+		<copy file="${basedir}/WHATSNEW" todir="${build.dir}" />
 		<zip
 			destfile="${build.dir}/jDDE-${version.num}.zip"
 			basedir="${build.dir}"
-			includes="jDDE.dll,jDDE.jar" />
+			includes="jDDE.dll,jDDE.jar,LICENSE,WHATSNEW" />
 	</target>
 
 	<target name="clean-after">
