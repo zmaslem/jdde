@@ -48,7 +48,7 @@ public abstract class ErrorEvent<A extends DdeApplication, C extends Conversatio
 		return error;
 	}
 
-	public static class ClientErrorEvent extends DisconnectEvent<DdeClient, ClientConversation> {
+	public static class ClientErrorEvent extends ErrorEvent<DdeClient, ClientConversation> {
 
 		public ClientErrorEvent(DdeClient client,
 				ClientConversation conversation, CallbackParameters parameters) {
@@ -57,7 +57,7 @@ public abstract class ErrorEvent<A extends DdeApplication, C extends Conversatio
 
 	}
 
-	public static class ServerErrorEvent extends DisconnectEvent<DdeServer, ServerConversation> {
+	public static class ServerErrorEvent extends ErrorEvent<DdeServer, ServerConversation> {
 
 		public ServerErrorEvent(DdeServer server,
 				ServerConversation conversation, CallbackParameters parameters) {

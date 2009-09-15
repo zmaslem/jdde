@@ -109,7 +109,7 @@ public class DdeClient extends DdeApplication {
 	}
 
 	@Override
-	public ClientConversation findConversation(int hConv) {
+	protected ClientConversation findConversation(int hConv) {
 		return (ClientConversation) super.findConversation(hConv);
 	}
 

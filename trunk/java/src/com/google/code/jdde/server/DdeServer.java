@@ -141,14 +141,14 @@ public class DdeServer extends DdeApplication {
 		DmlError.throwExceptionIfValidError(error.value);
 	}
 	
-	@Override
-	public ServerConversation findConversation(int conv) {
-		return (ServerConversation) super.findConversation(conv);
-	}
-	
 	/* ************************************ *
 	 ************ helper methods ************ 
 	 * ************************************ */
+	
+	@Override
+	protected ServerConversation findConversation(int conv) {
+		return (ServerConversation) super.findConversation(conv);
+	}
 	
 	void addConversation(ServerConversation conversation) {
 		conversations.add(conversation);

@@ -58,8 +58,6 @@ public class ConnectTests extends JavaDdeTests {
 		
 		DdeClient client = newClient();
 		client.connect(service, topic);
-
-		finishTest();
 	}
 	
 	@Test

@@ -72,6 +72,13 @@ public class JavaDdeTests extends Assert {
 	
 	@After
 	public void finishTest() {
+		for (DdeClient client : clients) {
+			client.rethrowMessageLoopException();
+		}
+		for (DdeServer server : servers) {
+			server.rethrowMessageLoopException();
+		}
+
 		if (latch != null) {
 			try {
 				latch.await(1000, TimeUnit.MILLISECONDS);
@@ -80,13 +87,6 @@ public class JavaDdeTests extends Assert {
 			if (latch.getCount() > 0) {
 				throw new AssertionFailedError("countdown latch is not empty");
 			}
-		}
-		
-		for (DdeClient client : clients) {
-			client.rethrowMessageLoopException();
-		}
-		for (DdeServer server : servers) {
-			server.rethrowMessageLoopException();
 		}
 	}
 	

@@ -22,7 +22,7 @@ import com.google.code.jdde.JavaDdeTests;
 import com.google.code.jdde.client.ClientConversation;
 import com.google.code.jdde.client.DdeClient;
 import com.google.code.jdde.event.ConnectConfirmEvent;
-import com.google.code.jdde.event.WildConnectEvent;
+import com.google.code.jdde.event.ConnectEvent;
 import com.google.code.jdde.misc.SupportedServiceTopic;
 import com.google.code.jdde.server.DdeServer;
 import com.google.code.jdde.server.event.ConnectionAdapter;
@@ -33,36 +33,87 @@ import com.google.code.jdde.server.event.ConnectionAdapter;
  */
 public class WildConnectTests extends JavaDdeTests {
 
+	SupportedServiceTopic[] sst = new SupportedServiceTopic[] {
+			new SupportedServiceTopic("Service1", "Topic1"),
+			new SupportedServiceTopic("Service2", "Topic2")
+	};
+	
 	@Test
 	public void serverReceivesWildConnectWhenClientUsesNullToConnect() throws Exception {
 		startTest(2);
 		
-		DdeServer server = newOpenServer();
+		DdeServer server = newServer();
 		server.turnServiceNameFilteringOff();
 		
 		server.setConnectionListener(new ConnectionAdapter() {
-			public SupportedServiceTopic[] onWildConnect(WildConnectEvent e) {
+			public SupportedServiceTopic[] onWildConnect(ConnectEvent e) {
 				assertNull(e.getService());
 				assertNull(e.getTopic());
 				
 				countDown();
-				
-				SupportedServiceTopic[] sst = new SupportedServiceTopic[] {
-						new SupportedServiceTopic("Service1", "Topic1"),
-						new SupportedServiceTopic("Service2", "Topic2")
-				};
 				return sst;
 			}
 			public void onConnectConfirm(ConnectConfirmEvent e) {
-				assertEquals("Service1", e.getConversation().getService());
-				assertEquals("Topic1", e.getConversation().getTopic());
-				
 				countDown();
 			}
 		});
 		
 		DdeClient client = newClient();
 		ClientConversation conv = client.connect(null, null);
+
+		boolean disconnected = conv.disconnect();
+		assertTrue(disconnected);
+	}
+	
+	@Test
+	public void serverReceivesWildConnectWhenClientUsesNullAsService() throws Exception {
+		startTest(2);
+		
+		DdeServer server = newServer();
+		server.turnServiceNameFilteringOff();
+		
+		server.setConnectionListener(new ConnectionAdapter() {
+			public SupportedServiceTopic[] onWildConnect(ConnectEvent e) {
+				assertEquals(service, e.getService());
+				assertNull(e.getTopic());
+				
+				countDown();
+				return sst;
+			}
+			public void onConnectConfirm(ConnectConfirmEvent e) {
+				countDown();
+			}
+		});
+		
+		DdeClient client = newClient();
+		ClientConversation conv = client.connect(service, null);
+
+		boolean disconnected = conv.disconnect();
+		assertTrue(disconnected);
+	}
+	
+	@Test
+	public void serverReceivesWildConnectWhenClientUsesNullAsTopic() throws Exception {
+		startTest(2);
+		
+		DdeServer server = newServer();
+		server.turnServiceNameFilteringOff();
+		
+		server.setConnectionListener(new ConnectionAdapter() {
+			public SupportedServiceTopic[] onWildConnect(ConnectEvent e) {
+				assertNull(e.getService());
+				assertEquals(topic, e.getTopic());
+				
+				countDown();
+				return sst;
+			}
+			public void onConnectConfirm(ConnectConfirmEvent e) {
+				countDown();
+			}
+		});
+		
+		DdeClient client = newClient();
+		ClientConversation conv = client.connect(null, topic);
 
 		boolean disconnected = conv.disconnect();
 		assertTrue(disconnected);

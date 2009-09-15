@@ -75,7 +75,7 @@ public abstract class DdeApplication {
 		
 		loop.invokeAndWait(new Runnable() {
 			public void run() {
-				result.value = DdeAPI.Uninitialize(idInst);
+				result.value = DdeAPI.Uninitialize_(idInst);
 				
 				if (result.value) {
 					loop.terminate();
@@ -86,17 +86,28 @@ public abstract class DdeApplication {
 		return result.value;
 	}
 	
-	public Conversation findConversation(int hConv) {
+	protected Conversation findConversation(int hConv) {
 		for (int i = 0; i < conversations.size(); i++) {
 			Conversation conversation = conversations.get(i);
 			if (hConv == conversation.getHConv()) {
 				return conversation;
 			}
 		}
-		logger.warning("Conversation " + hConv + " hasn't been found");
+		logger.warning("Conversation " + hConv + " hasn't been found!");
 		return null;
 	}
 	
+	protected boolean removeConversation(Conversation conversation) {
+		boolean result = conversations.remove(conversation);
+		if (!result) {
+			logger.warning("Conversation " + conversation.getHConv() + " hasn't been found!");
+		}
+		return result;
+	}
+	
+	/**
+	 * Used for test purposes only.
+	 */
 	public void rethrowMessageLoopException() {
 		Throwable t = loop.getLastThrowableCaught();
 		if (t != null) {

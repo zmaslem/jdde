@@ -24,7 +24,7 @@ class NativeLoader {
 
 	private static boolean loaded;
 	
-	public static void load() {
+	public static synchronized void load() {
 		if (!loaded) {
 			System.loadLibrary("jDDE");
 			loaded = true;
