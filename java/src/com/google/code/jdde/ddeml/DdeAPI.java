@@ -44,8 +44,7 @@ public class DdeAPI {
 	public static int Initialize(Pointer<Integer> $idInst, DdeCallback pfnCallback, int afCmd) {
 		int initError = Initialize($idInst, afCmd);
 		if (initError == 0) {
-			int idThread = WinAPI.GetCurrentThreadId();
-			CallbackManager.register(idThread, $idInst.value, pfnCallback);
+			CallbackManager.register($idInst.value, pfnCallback);
 		}
 		return initError;
 	}
@@ -56,6 +55,14 @@ public class DdeAPI {
 	
 	public static native boolean PostAdvise(int idInst, String hszTopic, String hszItem);
 	
-	public static native boolean Uninitialize(int idInst);
+	private static native boolean Uninitialize(int idInst);
+
+	public static boolean Uninitialize_(int idInst) {
+		boolean result = Uninitialize(idInst);
+		if (result) {
+			CallbackManager.unregister();
+		}
+		return result;
+	}
 	
 }

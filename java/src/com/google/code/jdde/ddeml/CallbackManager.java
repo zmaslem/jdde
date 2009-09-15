@@ -40,12 +40,25 @@ class CallbackManager {
 		callbacks = new HashMap<Integer, DdeCallback>();
 	}
 	
-	public static void register(int idThread, int idInst, DdeCallback callback) {
+	/**
+	 * This method can only be invoked by the same thread that initialized the DDEML.
+	 * 
+	 * @param idInst
+	 * @param callback
+	 */
+	static void register(int idInst, DdeCallback callback) {
+		int idThread = WinAPI.GetCurrentThreadId();
+		
 		instances.put(idThread, idInst);
 		callbacks.put(idThread, callback);
 	}
 	
-	public static void unregister(int idThread) {
+	/**
+	 * This method can only be invoked by the same thread that initialized the DDEML.
+	 */
+	static void unregister() {
+		int idThread = WinAPI.GetCurrentThreadId();
+		
 		instances.remove(idThread);
 		callbacks.remove(idThread);
 	}

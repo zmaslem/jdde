@@ -24,7 +24,6 @@ import com.google.code.jdde.ddeml.constants.FlagCallbackResult;
 import com.google.code.jdde.ddeml.constants.TransactionFlags;
 import com.google.code.jdde.event.ConnectConfirmEvent;
 import com.google.code.jdde.event.ConnectEvent;
-import com.google.code.jdde.event.WildConnectEvent;
 import com.google.code.jdde.event.ErrorEvent.ServerErrorEvent;
 import com.google.code.jdde.event.RegisterEvent.ServerRegisterEvent;
 import com.google.code.jdde.event.UnregisterEvent.ServerUnregisterEvent;
@@ -196,7 +195,7 @@ class ServerCallbackImpl implements DdeCallback {
 	public SupportedServiceTopic[] DdeWildConnectCallback(CallbackParameters parameters) {
 		switch (parameters.getUType()) {
 		case TransactionFlags.XTYP_WILDCONNECT:
-			WildConnectEvent event = new WildConnectEvent(server, parameters);
+			ConnectEvent event = new ConnectEvent(server, parameters);
 			
 			ConnectionListener connectionListener = server.getConnectionListener();
 			if (connectionListener != null) {
