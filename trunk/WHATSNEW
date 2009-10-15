@@ -1,3 +1,12 @@
+Changes from jDDE 0.2 to jDDE 0.3 (to be released yet)
+=================================
+
+* Fixed a bug in the ErrorEvent hierarchy.
+
+* Replaced WildConnectEvent with ConnectEvent, since they were the same.
+
+* A few minor improvements.
+
 Changes from jDDE 0.1 to jDDE 0.2
 =================================
 
