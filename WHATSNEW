@@ -1,11 +1,13 @@
-Changes from jDDE 0.2 to jDDE 0.3 (to be released yet)
-=================================
+Changes from jDDE 0.2 to jDDE-20091105
+======================================
 
 * Fixed a bug in the ErrorEvent hierarchy.
 
 * Replaced WildConnectEvent with ConnectEvent, since they were the same.
 
 * A few minor improvements.
+
+* DmlError.properties file is now being copied into jar file.
 
 Changes from jDDE 0.1 to jDDE 0.2
 =================================
