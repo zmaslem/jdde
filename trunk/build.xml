@@ -17,8 +17,6 @@
 	<property name="jDDE.src.dir" location="${jDDE.dir}/src" />
 	<property name="jDDE.bin.dir" location="${build.dir}/java" />
 
-	<property name="version.num" value="0.2"/>
-
 	<target name="clean-before">
 		<delete dir="${build.dir}" />
 	</target>
@@ -50,13 +48,18 @@
 
 	<target name="jar" depends="compile-java">
 		<tstamp>
-			<format property="today" pattern="yyyy-MM-dd HH:mm:ss" />
+			<format property="now" pattern="yyyy-MM-dd HH:mm:ss" />
+			<format property="version.num" pattern="yyyyMMdd" />
 		</tstamp>
+		
+		<copy todir="${jDDE.bin.dir}">
+			<fileset dir="${jDDE.src.dir}" excludes="**/*.java"/>
+		</copy>
 
 		<jar destfile="${build.dir}/jDDE.jar" basedir="${jDDE.bin.dir}">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
-				<attribute name="Built-Date" value="${today}"/>
+				<attribute name="Built-Date" value="${now}"/>
 				<attribute name="Implementation-Title" value="jDDE" />
 				<attribute name="Implementation-Version" value="${version.num}" />
 			</manifest>
@@ -64,6 +67,10 @@
 	</target>
 
 	<target name="zip" depends="compile-native, jar">
+		<tstamp>
+			<format property="version.num" pattern="yyyyMMdd" />
+		</tstamp>
+
 		<copy file="${basedir}/LICENSE" todir="${build.dir}" />
 		<copy file="${basedir}/WHATSNEW" todir="${build.dir}" />
 		<zip
